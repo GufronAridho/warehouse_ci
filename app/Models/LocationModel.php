@@ -10,6 +10,7 @@ class LocationModel extends Model
     protected $primaryKey = 'location_id';
 
     protected $allowedFields = [
+        'location_code',
         'storage_type',
         'rack',
         'bin',
@@ -45,7 +46,18 @@ class LocationModel extends Model
             'safe_string' => 'Material type contains invalid characters'
         ]
     ];
-
+    protected $beforeInsert = ['generate_location_code'];
+    protected $beforeUpdate = ['generate_location_code'];
+    protected function generate_location_code(array $data)
+    {
+        if (isset($data['data']['storage_type'], $data['data']['rack'], $data['data']['bin'])) {
+            $data['data']['location_code'] =
+                strtoupper($data['data']['storage_type']) . '|' .
+                strtoupper($data['data']['rack']) . '|' .
+                strtoupper($data['data']['bin']);
+        }
+        return $data;
+    }
     public function search_storage_type($q = null)
     {
         $builder = $this->builder();

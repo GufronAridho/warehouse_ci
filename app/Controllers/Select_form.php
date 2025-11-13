@@ -32,6 +32,24 @@ class Select_form extends BaseController
         return $this->response->setJSON(['items' => $items]);
     }
 
+    public function grTempMaterialNumberSelect()
+    {
+        $q = $this->request->getGet('q');
+        $user = auth()->user();
+        $username = $user->username;
+
+        $results = $this->MaterialModel->grTempMaterialNumberSelect($q, $username);
+
+        $items = [];
+        foreach ($results as $row) {
+            $items[] = [
+                'id' => $row->material_number,
+                'name' => $row->material_number . ' - ' . $row->material_desc
+            ];
+        }
+        return $this->response->setJSON(['items' => $items]);
+    }
+
     public function storageTypeSelect()
     {
         $q = $this->request->getGet('q');

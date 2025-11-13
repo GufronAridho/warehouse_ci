@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Models;
+
+use CodeIgniter\Model;
+
+class GrHeaderModel extends Model
+{
+    protected $table = 'tbl_gr_header';
+    protected $primaryKey = 'gr_id';
+    protected $allowedFields = [
+        'delivery_number',
+        'vendor',
+        'gr_date',
+        'status',
+        'created_by',
+        'created_at',
+        'updated_at'
+    ];
+    protected $useTimestamps = true;
+    protected $createdField  = 'created_at';
+    protected $updatedField  = 'updated_at';
+    protected $skipValidation = false;
+    protected $validationRules = [
+        'delivery_number' => 'required|safe_string',
+        'vendor' => 'required|safe_string',
+        'gr_date' => 'required|valid_date[Y-m-d]',
+        'status' => 'required',
+        'created_by' => 'required'
+    ];
+    protected $validationMessages = [
+        'delivery_number' => [
+            'required' => 'Delivery number is required',
+            'safe_string' => 'Delivery number contains invalid characters'
+        ],
+        'vendor' => [
+            'required' => 'Vendor is required',
+            'safe_string' => 'Vendor contains invalid characters'
+        ],
+        'gr_date' => [
+            'required' => 'GR date is required',
+            'valid_date' => 'GR date must be a valid date (Y-m-d)'
+        ],
+        'status' => [
+            'required' => 'Status is required',
+        ],
+        'created_by' => [
+            'required' => 'Created by is required',
+            'safe_string' => 'Created by contains invalid characters'
+        ]
+    ];
+}

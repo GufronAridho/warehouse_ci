@@ -19,16 +19,6 @@
                 <div class="col-md-9">
                     <div class="card h-100 custom-card-purple custom-card-slim card-button">
                         <div class="h-100 d-flex justify-content-end align-items-center gap-2 flex-wrap">
-
-                            <button class="btn btn-split btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#add_modal">
-                                <span class="btn-icon"><i class="fa fa-plus"></i></span>
-                                <span class="btn-text">
-                                    <strong>
-                                        Add Data
-                                    </strong>
-                                </span>
-                            </button>
-
                         </div>
                     </div>
                 </div>
@@ -47,15 +37,12 @@
                     <table class="table table-bordered table-striped table-hover table-custom" id="table_detail">
                         <thead>
                             <tr>
-                                <th class="text-center">Code</th>
-                                <th class="text-center">Storage Type</th>
-                                <th class="text-center">Rack</th>
-                                <th class="text-center">Bin</th>
-                                <th class="text-end">Capacity</th>
-                                <th class="text-center">Material Type Allowed</th>
-                                <th class="text-center">Priority</th>
-                                <th class="text-center">Status</th>
-                                <th class="text-center">Action</th>
+                                <th class="text-center">material_number</th>
+                                <th class="text-center">location_id</th>
+                                <th class="text-center">rack</th>
+                                <th class="text-center">bin</th>
+                                <th class="text-end">qty</th>
+                                <th class="text-center">last_updated</th>
                             </tr>
                         </thead>
                         <tbody id="table_detail_body">
@@ -90,7 +77,7 @@
                                         <div class="col-md-6">
                                             <label for="add_storage_type" class="form-label">Storage Type</label>
                                             <select class="form-select" id="add_storage_type" name="storage_type">
-                                                <option value="STAGING">STAGING</option>
+                                                <option value="GR-AREA">GR-AREA</option>
                                                 <option value="STORAGE">STORAGE</option>
                                             </select>
                                         </div>
@@ -262,19 +249,6 @@
             allowClear: true,
             width: '100%',
             dropdownParent: modal ? $(modal) : null,
-            tags: true,
-            createTag: function(params) {
-                let term = $.trim(params.term);
-                let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (term === '' || !emailRegex.test(term)) {
-                    return null;
-                }
-                return {
-                    id: term,
-                    text: term,
-                    newTag: true
-                };
-            },
             ajax: {
                 url: url,
                 dataType: 'json',
@@ -390,7 +364,7 @@
         }
         $('#table_detail_body').html(`
         <tr id="table_loading">
-            <td colspan="9" class="text-center py-4">
+            <td colspan="6" class="text-center py-4">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
@@ -399,7 +373,7 @@
         </tr>
         `);
         $.ajax({
-            url: "<?= base_url('master_data/location_table'); ?>",
+            url: "<?= base_url('master_data/stock_table'); ?>",
             type: "GET",
             dataType: "html",
             success: function(res) {
@@ -410,7 +384,7 @@
                 console.error("AJAX Error:", error);
                 $('#table_detail_body').html(`
                 <tr>
-                    <td colspan="9" class="text-center text-black p-3">
+                    <td colspan="6" class="text-center text-black p-3">
                         Failed to load data. Please try again.
                     </td>
                 </tr>
@@ -429,7 +403,7 @@
             .appendTo('#' + tableId + ' thead');
 
         $('#' + tableId + ' thead tr.search-row th').each(function(index) {
-            if (index === 8 || index === 0) {
+            if (index === 5) {
                 $(this).html('');
             } else {
                 $(this).html('<input type="text" placeholder="Search" class="form-control form-control-sm" />');

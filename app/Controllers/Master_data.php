@@ -5,18 +5,21 @@ namespace App\Controllers;
 use CodeIgniter\Shield\Entities\User;
 use App\Models\MaterialModel;
 use App\Models\LocationModel;
+use App\Models\StockModel;
 
 class Master_data extends BaseController
 {
     protected $MstUser;
     protected $MaterialModel;
     protected $LocationModel;
+    protected $StockModel;
 
     public function __construct()
     {
         $this->MstUser = auth()->getProvider();
         $this->MaterialModel = new MaterialModel();
         $this->LocationModel = new LocationModel();
+        $this->StockModel = new StockModel();
     }
 
     private function _json_response($status, $message, $is_validation = false)
@@ -55,6 +58,14 @@ class Master_data extends BaseController
             'title' => 'Location',
         ]);
     }
+
+    public function mst_stock()
+    {
+        return view('master_data/mst_stock', [
+            'title' => 'Stock',
+        ]);
+    }
+
     public function user_table()
     {
         $users = $this->MstUser->withIdentities()
@@ -88,6 +99,15 @@ class Master_data extends BaseController
             'item' => $item
         ];
         return view('master_data/partial/location_table', $data);
+    }
+
+    public function stock_table()
+    {
+        $item = $this->StockModel->findAll();
+        $data = [
+            'item' => $item
+        ];
+        return view('master_data/partial/stock_table', $data);
     }
 
     private function updateUserGroup($userId, $newGroup)

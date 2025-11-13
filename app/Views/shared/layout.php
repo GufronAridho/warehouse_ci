@@ -161,6 +161,13 @@
                                         <p>Location</p>
                                     </a>
                                 </li>
+                                <li class="nav-item">
+                                    <a href="<?= base_url('master_data/mst_stock'); ?>"
+                                        class="nav-link <?= (uri_string() == 'master_data/mst_stock') ? 'active' : '' ?>">
+                                        <i class="fas fa-boxes nav-icon"></i>
+                                        <p>Stock</p>
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                         <li class="nav-item">
@@ -329,7 +336,7 @@
         }
 
         .custom-card-purple {
-            background: #5f0188;
+            background: #5f0188 !important;
             border: none;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -339,6 +346,10 @@
         .modal-custom-purple {
             background: #5f0188eb;
             color: #ffd700;
+        }
+
+        .text-purple {
+            color: #5f0188eb;
         }
 
         .custom-card-breadcrumb {
@@ -498,18 +509,15 @@
             background-color: #efe6ff;
         }
 
-        #add_modal .select2-container--default .select2-selection--single,
-        #edit_modal .select2-container--default .select2-selection--single {
+        .select2-container--default .select2-selection--single {
             height: calc(1.5em + 0.75rem + 2px);
         }
 
-        #add_modal .select2-container--default .select2-selection--single .select2-selection__rendered,
-        #edit_modal .select2-container--default .select2-selection--single .select2-selection__rendered {
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
             line-height: calc(1.5em + 0.75rem);
         }
 
-        #add_modal .select2-container--default .select2-selection--single .select2-selection__arrow,
-        #edit_modal .select2-container--default .select2-selection--single .select2-selection__arrow {
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
             height: calc(1.5em + 0.75rem + 2px);
         }
     </style>

@@ -1,7 +1,7 @@
-<?php $no = 1;
+<?php
 foreach ($item as $i): ?>
     <tr>
-        <td class="text-center"><?= $no++; ?></td>
+        <td class="text-center"><?= $i['location_code']; ?></td>
         <td class="text-center"><?= $i['storage_type']; ?></td>
         <td class="text-center"><?= $i['rack']; ?></td>
         <td class="text-center"><?= $i['bin']; ?></td>
