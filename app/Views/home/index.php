@@ -20,10 +20,10 @@
                 <div class="row g-3 justify-content-center align-items-stretch">
                     <?php
                     $card = [
-                        ['title' => 'Good Receipt', 'desc' => 'Record and manage incoming goods efficiently.', 'img' => 'fa-solid fa-truck-loading', 'link' => 'good_receipt/summary'],
-                        ['title' => 'Put Away', 'desc' => 'Organize and store materials in optimal locations.', 'img' => 'fa-solid fa-box-open', 'link' => 'put_away/summary'],
-                        ['title' => 'Picking', 'desc' => 'Accurately pick items for orders and shipments.', 'img' => 'fa-solid fa-shopping-cart', 'link' => 'picking/summary'],
-                        ['title' => 'Cycle Count', 'desc' => 'Maintain accurate inventory through regular counting.', 'img' => 'fa-solid fa-sync-alt', 'link' => 'cycle_count/summary'],
+                        ['title' => 'Good Receipt', 'desc' => 'Record and manage incoming goods efficiently.', 'img' => 'fa-solid fa-truck-loading', 'link' => 'process/good_receipt'],
+                        ['title' => 'Put Away', 'desc' => 'Organize and store materials in optimal locations.', 'img' => 'fa-solid fa-box-open', 'link' => 'process/put_away'],
+                        ['title' => 'Picking', 'desc' => 'Accurately pick items for orders and shipments.', 'img' => 'fa-solid fa-shopping-cart', 'link' => 'process/picking'],
+                        ['title' => 'Cycle Count', 'desc' => 'Maintain accurate inventory through regular counting.', 'img' => 'fa-solid fa-sync-alt', 'link' => 'process/cycle_count'],
                     ];
                     ?>
                     <?php foreach ($card as $c): ?>

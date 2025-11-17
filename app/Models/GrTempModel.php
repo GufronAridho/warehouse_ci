@@ -9,45 +9,51 @@ class GrTempModel extends Model
     protected $table = 'tbl_gr_temp';
     protected $primaryKey = 'id';
     protected $allowedFields = [
-        'username',
+        'delivery_number',
+        'vendor',
         'material_number',
         'qty_received',
         'qty_order',
         'uom',
+        'status',
+        'created_by',
+        'created_at',
+        'validated_by',
+        'validated_at',
     ];
-    protected $skipValidation = false;
-    protected $validationRules = [
-        'material_number' => 'required|safe_string',
-        'qty_received' => 'required|decimal|greater_than[0]',
-        'qty_order' => 'permit_empty|decimal',
-        'uom' => 'required|safe_string',
-        'username' => 'required'
-    ];
-    protected $validationMessages = [
-        'material_number' => [
-            'required' => 'Material number is required',
-            'safe_string' => 'Material number contains invalid characters'
-        ],
-        'qty_received' => [
-            'required' => 'Received quantity is required',
-            'decimal' => 'Received quantity must be a number',
-            'greater_than' => 'Received quantity must be greater than zero.'
-        ],
-        'qty_order' => [
-            'decimal' => 'Order quantity must be a number'
-        ],
-        'uom' => [
-            'required' => 'UOM is required',
-            'safe_string' => 'UOM contains invalid characters'
-        ],
-        'username' => [
-            'required' => 'Username is required',
-        ]
-    ];
+    // protected $skipValidation = false;
+    // protected $validationRules = [
+    //     'material_number' => 'required|safe_string',
+    //     'qty_received' => 'required|decimal|greater_than[0]',
+    //     'qty_order' => 'permit_empty|decimal',
+    //     'uom' => 'required|safe_string',
+    //     'username' => 'required'
+    // ];
+    // protected $validationMessages = [
+    //     'material_number' => [
+    //         'required' => 'Material number is required',
+    //         'safe_string' => 'Material number contains invalid characters'
+    //     ],
+    //     'qty_received' => [
+    //         'required' => 'Received quantity is required',
+    //         'decimal' => 'Received quantity must be a number',
+    //         'greater_than' => 'Received quantity must be greater than zero.'
+    //     ],
+    //     'qty_order' => [
+    //         'decimal' => 'Order quantity must be a number'
+    //     ],
+    //     'uom' => [
+    //         'required' => 'UOM is required',
+    //         'safe_string' => 'UOM contains invalid characters'
+    //     ],
+    //     'username' => [
+    //         'required' => 'Username is required',
+    //     ]
+    // ];
 
-    public function save_detail($delivery_number, $username, $staging_location)
+    public function save_detail($delivery_number, $staging_location)
     {
-        $item = $this->where('username', $username)->findAll();
+        $item = $this->where('delivery_number', $delivery_number)->findAll();
         $data = [];
         foreach ($item as $i) {
             $data[] = [
@@ -64,7 +70,7 @@ class GrTempModel extends Model
         }
         $GrDetailModel = new \App\Models\GrDetailModel();
         $GrDetailModel->insertBatch($data);
-        $this->where('username', $username)->delete();
+        $this->where('delivery_number', $delivery_number)->delete();
         return true;
     }
 }

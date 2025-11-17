@@ -9,6 +9,11 @@ use App\Models\StockModel;
 use App\Models\GrHeaderModel;
 use App\Models\GrDetailModel;
 use App\Models\GrTempModel;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\RoundBlockSizeMode;
+use Endroid\QrCode\Writer\PngWriter;
 
 class Process extends BaseController
 {
@@ -79,14 +84,28 @@ class Process extends BaseController
     {
         $user = auth()->user();
         $username = $user->username;
+        $delivery_number = $this->request->getGet('delivery_number');
         $item = $this->GrTempModel->select('tbl_gr_temp.*, b.material_desc')
             ->join('mst_material b', 'tbl_gr_temp.material_number = b.material_number', 'left')
-            ->where('tbl_gr_temp.username', $username)
+            ->where('tbl_gr_temp.delivery_number', $delivery_number)
             ->findAll();
         $data = [
             'item' => $item
         ];
         return view('process/partial/gr_temp_material_table', $data);
+    }
+
+    public function gr_print_detail()
+    {
+        $delivery_number = $this->request->getGet('delivery_number');
+        $item = $this->GrDetailModel->select('tbl_gr_detail.*, b.material_desc')
+            ->join('mst_material b', 'tbl_gr_detail.material_number = b.material_number', 'left')
+            ->where('tbl_gr_detail.delivery_number', $delivery_number)
+            ->findAll();
+        $data = [
+            'item' => $item
+        ];
+        return view('process/partial/gr_print_detail_table', $data);
     }
 
     public function modal_material_detail()
@@ -99,94 +118,107 @@ class Process extends BaseController
         ]);
     }
 
-    public function create_gr_temp_material()
+    public function scan_delivery_number()
+    {
+        if ($this->request->is('post')) {
+
+            $user = auth()->user();
+            $username = $user->username;
+
+            $items = $this->request->getPost('items');
+
+            if (!$items || !is_array($items)) {
+                return $this->_json_response(false, 'Invalid data format');
+            }
+
+            try {
+                foreach ($items as $row) {
+                    $delivery_number = $row['delivery_number'];
+                    $material_number = $row['material'];
+                    $exists = $this->GrTempModel
+                        ->where('delivery_number', $delivery_number)
+                        ->where('material_number', $material_number)
+                        ->first();
+                    if ($exists) {
+                        continue;
+                    }
+                    $data = [
+                        'delivery_number' =>  $delivery_number,
+                        'material_number' =>  $material_number,
+                        'qty_received' => 0,
+                        'qty_order' => $row['qty'] ?? 0,
+                        'uom' => $row['uom'] ?? '',
+                        'vendor' => $row['vendor'] ?? null,
+                        'status' => 'OPEN',
+                        'created_by' => $username,
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ];
+
+                    $this->GrTempModel->insert($data);
+                }
+
+                return $this->_json_response(true, 'Materials inserted successfully');
+            } catch (\Exception $e) {
+                return $this->_json_response(false, $e->getMessage());
+            }
+        }
+
+        return $this->_json_response(false, 'Invalid request method');
+    }
+
+    public function scan_material()
     {
         if ($this->request->is('post')) {
             $user = auth()->user();
             $username = $user->username;
 
-            $qty_order = $this->empty_post('qty_order', 0);
-            $qty_received = $this->empty_post('qty_received', 0);
-            // $qty_remaining = max(0, $qty_order - $qty_received);
+            $material = $this->request->getPost('material');
+            $qty = $this->request->getPost('qty');
+            $uom = $this->request->getPost('uom');
+            $delivery_number = $this->request->getPost('delivery_number');
 
-            $data = [
-                'username'  => $username,
-                'material_number' => $this->request->getPost('material_number'),
-                'qty_order' => $qty_order,
-                'qty_received' => $qty_received,
-                // 'qty_remaining' => $qty_remaining,
-                'uom' => $this->request->getPost('uom'),
-            ];
-
-            try {
-                if ($this->GrTempModel->insert($data)) {
-                    return $this->_json_response(true, 'Material created successfully');
-                } else {
-                    $errors = $this->GrTempModel->errors();
-                    $message = implode(', ', $errors);
-                    return $this->_json_response(false, $message);
-                }
-            } catch (\Exception $e) {
-                return $this->_json_response(false, $e->getMessage());
+            if (!$material || !$qty || !$uom || !$delivery_number) {
+                return $this->_json_response(false, "Missing fields");
             }
+
+            $exists = $this->GrTempModel
+                ->where('material_number', $material)
+                ->where('delivery_number', $delivery_number)
+                ->first();
+
+            if (!$exists) {
+                return $this->_json_response(false, "Material not found in DO list");
+            }
+
+            $this->GrTempModel->where('material_number', $material)
+                ->where('delivery_number', $delivery_number)
+                ->set('qty_received', "qty_received + $qty", false)
+                ->set('validated_by', $username)
+                ->set('validated_at', date('Y-m-d H:i:s'))
+                ->update();
+
+            $updated = $this->GrTempModel
+                ->where('material_number', $material)
+                ->where('delivery_number', $delivery_number)
+                ->first();
+
+            $status = "OPEN";
+            if ($updated['qty_received'] > 0 && $updated['qty_received'] < $updated['qty_order']) {
+                $status = "PARTIAL";
+            } elseif ($updated['qty_received'] >= $updated['qty_order']) {
+                $status = "COMPLETE";
+            }
+
+            $this->GrTempModel
+                ->where('material_number', $material)
+                ->where('delivery_number', $delivery_number)
+                ->set('status', $status)
+                ->update();
+
+            return $this->_json_response(true, "Material validated successfully");
         }
 
-        return $this->_json_response(false, 'Invalid request method');
-    }
-
-    public function update_gr_temp_material()
-    {
-        if ($this->request->is('post')) {
-            $id = $this->request->getPost('id');
-            if (empty($id)) {
-                return $this->_json_response(false, 'Missing ID.');
-            }
-
-            $qty_order = $this->empty_post('qty_order', 0);
-            $qty_received = $this->empty_post('qty_received', 0);
-            // $qty_remaining = max(0, $qty_order - $qty_received);
-
-            $data = [
-                'material_number' => $this->request->getPost('material_number'),
-                'qty_order' => $qty_order,
-                'qty_received' => $qty_received,
-                // 'qty_remaining' => $qty_remaining,
-                'uom' => $this->request->getPost('uom'),
-            ];
-            try {
-                if ($this->GrTempModel->update($id, $data)) {
-                    return $this->_json_response(true, 'Material update successfully');
-                } else {
-                    $errors = $this->GrTempModel->errors();
-                    $message = implode(', ', $errors);
-                    return $this->_json_response(false, $message);
-                }
-            } catch (\Exception $e) {
-                return $this->_json_response(false, $e->getMessage());
-            }
-        }
-        return $this->_json_response(false, 'Invalid request method');
-    }
-
-    public function delete_gr_temp_material()
-    {
-        if ($this->request->is('post')) {
-            $id = $this->request->getPost('id');
-            if (empty($id)) {
-                return $this->_json_response(false, 'Missing ID.');
-            }
-            try {
-                if ($this->GrTempModel->delete($id)) {
-                    return $this->_json_response(true, 'Material deleted successfully');
-                } else {
-                    return $this->_json_response(false, 'Failed to delete Material');
-                }
-            } catch (\Exception $e) {
-                return $this->_json_response(false, $e->getMessage());
-            }
-        }
-
-        return $this->_json_response(false, 'Invalid request method');
+        return $this->_json_response(false, "Invalid request");
     }
 
     public function submit_gr()
@@ -194,12 +226,11 @@ class Process extends BaseController
         if ($this->request->is('post')) {
             $user = auth()->user();
             $username = $user->username;
+            $delivery_number = $this->request->getPost('delivery_number');
 
-            $temp = $this->GrTempModel->where('username', $username)->findAll();
-            if (empty($temp)) {
-                return $this->_json_response(false, 'Please add at least one material 
-                before submitting the GR.');
-            }
+            $temp_gr = $this->GrTempModel
+                ->where('delivery_number', $delivery_number)
+                ->first();
 
             $staging = $this->LocationModel
                 ->where('storage_type', 'STAGING')
@@ -213,13 +244,13 @@ class Process extends BaseController
             $rack =  $staging['rack'];
             $bin =  $staging['bin'];
 
-            $delivery_number = $this->request->getPost('delivery_number');
             $data = [
                 'delivery_number' => $delivery_number,
-                'vendor' => $this->request->getPost('vendor'),
-                'gr_date' => $this->request->getPost('gr_date'),
+                'vendor' => $temp_gr['vendor'],
+                'gr_date' => date('Y-m-d'),
                 'status' => 'OPEN',
-                'created_by' => $username,
+                'submited_by' => $username,
+                'submited_at' => date('Y-m-d H:i:s'),
             ];
 
             $db = \Config\Database::connect();
@@ -229,7 +260,6 @@ class Process extends BaseController
                 if ($this->GrHeaderModel->insert($data)) {
                     $insert_detail = $this->GrTempModel->save_detail(
                         $delivery_number,
-                        $username,
                         $staging_location
                     );
                     if ($insert_detail) {
@@ -265,5 +295,41 @@ class Process extends BaseController
             }
         }
         return $this->_json_response(false, 'Invalid request method');
+    }
+
+    public function label()
+    {
+        $material = $this->request->getGet('material');
+        $qty = $this->request->getGet('qty');
+        $uom = $this->request->getGet('uom');
+
+        if (!$material || !$qty || !$uom) {
+            return "Missing parameters!";
+        }
+
+        $qr_content = "{$material};{$qty};{$uom}";
+
+        $builder = new Builder(
+            writer: new PngWriter(),
+            writerOptions: [],
+            validateResult: false,
+            data: $qr_content,
+            encoding: new Encoding('UTF-8'),
+            errorCorrectionLevel: ErrorCorrectionLevel::High,
+            size: 300,
+            margin: 10,
+            roundBlockSizeMode: RoundBlockSizeMode::Margin
+        );
+
+        $result = $builder->build();
+
+        $qrImage = base64_encode($result->getString());
+
+        return view('process/print/label', [
+            'material' => $material,
+            'qty' => $qty,
+            'uom' => $uom,
+            'qrImage' => $qrImage
+        ]);
     }
 }

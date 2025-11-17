@@ -2,93 +2,61 @@
 
 <?= $this->section('content') ?>
 <main class="app-main">
-    <!--begin::App Content-->
+
+    <input type="hidden" id="delivery_number">
+
+
     <div class="app-content">
         <div class="container-fluid">
-            <div class="card shadow-sm rounded-3 card-table mb-2 mt-2">
-                <div class="card-header text-center custom-card-purple">
-                    <h5 class="m-0" style="color:#FFD700;">
-                        <i class="fas fa-receipt me-2"></i> GR Request
-                    </h5>
-                </div>
-                <form id="submit_gr">
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <div class="input-group">
-                                    <div class="form-floating flex-grow-1">
-                                        <input type="text"
-                                            class="form-control "
-                                            id="delivery_number"
-                                            name="delivery_number"
-                                            placeholder="Delivery Number"
-                                            required>
-                                        <label for="delivery_number">Delivery Number</label>
-                                    </div>
-                                    <div class="input-group-text ">
-                                        <i class="fas fa-truck text-purple"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="input-group">
-                                    <div class="form-floating flex-grow-1">
-                                        <input type="text"
-                                            class="form-control "
-                                            id="vendor"
-                                            name="vendor"
-                                            placeholder="Vendor"
-                                            required>
-                                        <label for="vendor">Vendor</label>
-                                    </div>
-                                    <div class="input-group-text ">
-                                        <i class="fas fa-industry text-purple"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="input-group">
-                                    <div class="form-floating flex-grow-1">
-                                        <input type="date"
-                                            class="form-control "
-                                            id="gr_date"
-                                            name="gr_date"
-                                            placeholder="GR Date"
-                                            required>
-                                        <label for="gr_date">GR Date</label>
-                                    </div>
-                                    <div class="input-group-text ">
-                                        <i class="fas fa-calendar-day text-purple"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-12">
-                                <div class="input-group">
-                                    <div class="form-floating flex-grow-1">
-                                        <select class="form-select"
-                                            id="material_number"
-                                            name="material_number">
-                                        </select>
-                                    </div>
-                                    <div class="input-group-text ">
-                                        <i class="fas fa-cubes text-purple"></i>
-                                    </div>
-                                </div>
-                            </div>
+
+            <div class="card shadow-sm rounded-3 card-table mb-3 mt-3">
+
+                <div id="section-scan-delivery">
+                    <div class="card-header text-center custom-card-purple">
+                        <h5 class="m-0" style="color:#FFD700;">
+                            <i class="fas fa-file-invoice me-2"></i> Scan Delivery QR
+                        </h5>
+                    </div>
+                    <ul class="nav nav-tabs custom-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" type="button" role="tab">
+                                <i class="fas fa-file-invoice me-1"></i> Scan DO
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="card-body d-flex justify-content-center">
+                        <div id="reader" style="width: 500px;">
+
                         </div>
                     </div>
+                </div>
+
+                <div id="section-scan-material" style="display:none">
+                    <div class="card-header text-center custom-card-purple">
+                        <h5 class="m-0" style="color:#FFD700;">
+                            <i class="fas fa-box-open me-2"></i> Scan Material QR
+                        </h5>
+                    </div>
+                    <ul class="nav nav-tabs custom-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" type="button" role="tab">
+                                <i class="fas fa-box-open me-1"></i> Scan Material
+                            </button>
+                        </li>
+                    </ul>
                     <div class="card-body">
+                        <div class="card-body d-flex justify-content-center">
+                            <div id="reader-material" style="width: 500px;"></div>
+                        </div>
                         <table class="table table-bordered table-striped table-hover table-custom" id="table_detail">
                             <thead>
                                 <tr>
-                                    <th class="text-center">No</th>
+                                    <th class="text-center">Status</th>
                                     <th class="text-center">Material Number</th>
                                     <th class="text-center">Material Description</th>
                                     <th class="text-end">Qty Ordered</th>
                                     <th class="text-end">Qty Received</th>
                                     <th class="text-center">UOM</th>
-                                    <th class="text-center">Status</th>
-                                    <th class="text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="table_detail_body">
@@ -97,418 +65,308 @@
                         </table>
                     </div>
                     <div class="card-footer d-flex justify-content-end">
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-success" id="submit_gr">
                             <i class="fas fa-save me-2"></i> Submit GR
                         </button>
                     </div>
-                </form>
+                </div>
+
+                <div id="section-print-material" style="display:none">
+                    <div class="card-header text-center custom-card-purple">
+                        <h5 class="m-0" style="color:#FFD700;">
+                            <i class="fas fa-print me-2"></i> Print Material QR
+                        </h5>
+                    </div>
+                    <ul class="nav nav-tabs custom-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" type="button" role="tab">
+                                <i class="fas fa-print me-1"></i> Print Material
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="card-body">
+                        <table class="table table-bordered table-striped table-hover table-custom" id="table_print">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">Material Number</th>
+                                    <th class="text-center">Material Description</th>
+                                    <th class="text-end">Qty Ordered</th>
+                                    <th class="text-end">Qty Received</th>
+                                    <th class="text-center">UOM</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table_print_detail">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
+
         </div>
     </div>
-    <!--end::App Content-->
 </main>
 
-<!-- Modal -->
-<div class="modal fade" id="add_modal" tabindex="-1" aria-labelledby="add_modalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header modal-custom-purple">
-                <h5 class="modal-title">
-                    <i class="fas fa-boxes me-2"></i> Material Quantity
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="form_add">
-                <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <div class="form-floating flex-grow-1">
-                                    <input type="text"
-                                        class="form-control"
-                                        id="add_material_number"
-                                        name="material_number"
-                                        placeholder="Material Number"
-                                        readonly>
-                                    <label for="add_material_number">Material Number</label>
-                                </div>
-                                <div class="input-group-text">
-                                    <i class="fas fa-cube text-purple"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <div class="form-floating flex-grow-1">
-                                    <input type="text"
-                                        class="form-control"
-                                        id="add_material_desc"
-                                        name="material_desc"
-                                        placeholder="Material Description"
-                                        readonly>
-                                    <label for="add_material_desc">Material Description</label>
-                                </div>
-                                <div class="input-group-text">
-                                    <i class="fas fa-align-left text-purple"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="input-group">
-                                <div class="form-floating flex-grow-1">
-                                    <input type="number"
-                                        class="form-control"
-                                        id="add_qty_order"
-                                        name="qty_order"
-                                        placeholder="Qty Ordered"
-                                        value="0">
-                                    <label for="add_qty_order">Qty Ordered</label>
-                                </div>
-                                <div class="input-group-text">
-                                    <i class="fas fa-clipboard-list text-purple"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="input-group">
-                                <div class="form-floating flex-grow-1">
-                                    <input type="number"
-                                        class="form-control"
-                                        id="add_qty_received"
-                                        name="qty_received"
-                                        placeholder="Qty Received"
-                                        value="0" required>
-                                    <label for="add_qty_received">Qty Received</label>
-                                </div>
-                                <div class="input-group-text">
-                                    <i class="fas fa-box-open text-purple"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="input-group">
-                                <div class="form-floating flex-grow-1">
-                                    <input type="text"
-                                        class="form-control"
-                                        id="add_uom"
-                                        name="uom"
-                                        placeholder="Unit of Measure">
-                                    <label for="add_uom">Unit of Measure</label>
-                                </div>
-                                <div class="input-group-text">
-                                    <i class="fas fa-ruler text-purple"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i> Close
-                    </button>
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save me-1"></i> Save Material
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="edit_modal" tabindex="-1" aria-labelledby="edit_modalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header modal-custom-purple">
-                <h5 class="modal-title">
-                    <i class="fas fa-boxes me-2"></i> Material Quantity
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <form id="form_edit">
-                <input type="hidden" id="edit_id" name="id">
-                <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <div class="form-floating flex-grow-1">
-                                    <input type="text"
-                                        class="form-control"
-                                        id="edit_material_number"
-                                        name="material_number"
-                                        placeholder="Material Number"
-                                        readonly>
-                                    <label for="edit_material_number">Material Number</label>
-                                </div>
-                                <div class="input-group-text">
-                                    <i class="fas fa-cube text-purple"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <div class="form-floating flex-grow-1">
-                                    <input type="text"
-                                        class="form-control"
-                                        id="edit_material_desc"
-                                        name="material_desc"
-                                        placeholder="Material Description"
-                                        readonly>
-                                    <label for="edit_material_desc">Material Description</label>
-                                </div>
-                                <div class="input-group-text">
-                                    <i class="fas fa-align-left text-purple"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="input-group">
-                                <div class="form-floating flex-grow-1">
-                                    <input type="number"
-                                        class="form-control"
-                                        id="edit_qty_order"
-                                        name="qty_order"
-                                        placeholder="Qty Ordered"
-                                        value="0">
-                                    <label for="edit_qty_order">Qty Ordered</label>
-                                </div>
-                                <div class="input-group-text">
-                                    <i class="fas fa-clipboard-list text-purple"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="input-group">
-                                <div class="form-floating flex-grow-1">
-                                    <input type="number"
-                                        class="form-control"
-                                        id="edit_qty_received"
-                                        name="qty_received"
-                                        placeholder="Qty Received"
-                                        value="0" required>
-                                    <label for="edit_qty_received">Qty Received</label>
-                                </div>
-                                <div class="input-group-text">
-                                    <i class="fas fa-box-open text-purple"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="input-group">
-                                <div class="form-floating flex-grow-1">
-                                    <input type="text"
-                                        class="form-control"
-                                        id="edit_uom"
-                                        name="uom"
-                                        placeholder="Unit of Measure">
-                                    <label for="edit_uom">Unit of Measure</label>
-                                </div>
-                                <div class="input-group-text">
-                                    <i class="fas fa-ruler text-purple"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i> Close
-                    </button>
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save me-1"></i> Save Material
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <style>
+    .custom-tabs .nav-link {
+        color: #5f0188;
+        font-weight: 500;
+        text-align: center;
+        transition: all 0.2s ease-in-out;
+        font-size: medium;
+    }
 
+    .custom-tabs .nav-link:hover {
+        background-color: #fff;
+        color: #5f0188;
+    }
+
+    .custom-tabs .nav-link.active {
+        color: #5f0188;
+        background-color: #fff;
+        border-bottom: 3px solid #5f0188;
+        font-weight: 600;
+    }
 </style>
 <?= $this->endSection() ?>
 
 <?= $this->section('script'); ?>
 <script>
-    // $('#add_modal').on('shown.bs.modal', function() {
-    //     initSelect2Ajax('#add_email', 'Select Email', "<?= base_url('select_form/emailSelect') ?>", '#add_modal .modal-body');
-    // });
+    function onScanSuccess(decodedText, decodedResult) {
+        console.log(`Scan result: ${decodedText}`, decodedResult);
+        let lines = decodedText.trim().split("\n");
+        let items = [];
+        let isValid = true;
+        const formatRegex = /^([^;]+);([^;]+);([^;]+);([^;]+);([^;]+)$/;
+        lines.forEach((line, index) => {
+            line = line.trim();
+            if (!formatRegex.test(line)) {
+                isValid = false;
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid QR Format',
+                    html: `Line <b>${index + 1}</b> is not valid:<br><code>${line}</code><br><br>
+                       Expected format:<br>
+                       <code>DELIVERY NUMBER;MATERIAL;QTY;UOM;VENDOR</code>`
+                });
+                html5QrcodeScanner.clear();
+                return;
+            }
+            let parts = line.split(";");
+            items.push({
+                delivery_number: parts[0].trim(),
+                material: parts[1].trim(),
+                qty: parts[2].trim(),
+                uom: parts[3].trim(),
+                vendor: parts[4].trim()
+            });
+        });
+        if (!isValid) return;
+        let delivery_number = items[0].delivery_number;
+        $("#delivery_number").val(delivery_number);
+        Swal.fire({
+            title: 'Processing...',
+            text: 'Please wait',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            allowEnterKey: false,
+            didOpen: () => Swal.showLoading()
+        });
+        $.ajax({
+            url: "<?= base_url('process/scan_delivery_number'); ?>",
+            type: "POST",
+            data: {
+                items: items
+            },
+            dataType: "json",
+            success: function(res) {
+                Swal.close();
+                if (res.status) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: res.message,
+                        timer: 1000,
+                        showConfirmButton: false
+                    });
+                    $("#section-scan-delivery").hide();
+                    $("#section-scan-material").show();
+                    get_table_material();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: res.message
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                Swal.close();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Request Failed',
+                    text: error
+                });
+            }
+        });
+        html5QrcodeScanner.clear();
+    }
 
-    // $('#edit_modal').on('shown.bs.modal', function() {
-    //     initSelect2Ajax('#edit_email', 'Select Email', "<?= base_url('select_form/emailSelect') ?>", '#edit_modal .modal-body');
-    // });
+    function onScanError(errorMessage) {
+        console.warn(`QR Code Scan Error: ${errorMessage}`);
+    }
 
-    $('#add_modal').on('hidden.bs.modal', function() {
-        $(this).find('form')[0].reset();
-        $(this).find('select').val(null).trigger('change');
-        $(this).find('.error, .invalid-feedback').remove();
-        $(this).find('.is-invalid').removeClass('is-invalid');
-        $('#material_number').val(null).trigger('change');
-    });
+    let html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader", {
+            fps: 15,
+            qrbox: {
+                width: 250,
+                height: 250
+            }
+        },
+    );
+    html5QrcodeScanner.render(onScanSuccess, onScanError);
 
-    $('#edit_modal').on('hidden.bs.modal', function() {
-        $(this).find('form')[0].reset();
-        $(this).find('select').val(null).trigger('change');
-        $(this).find('.error, .invalid-feedback').remove();
-        $(this).find('.is-invalid').removeClass('is-invalid');
-    });
+    let isScanning = true;
 
-    function initSelect2Ajax(selector, placeholder, url, modal = null) {
-        $(selector).select2({
-            placeholder: placeholder,
-            allowClear: true,
-            width: '100%',
-            dropdownParent: modal ? $(modal) : null,
-            ajax: {
-                url: url,
-                dataType: 'json',
-                delay: 100,
-                data: function(params) {
-                    return {
-                        q: params.term
-                    };
-                },
-                processResults: function(data) {
-                    if (!data.items) return {
-                        results: []
-                    };
+    function onMaterialScanSuccess(decodedText, decodedResult) {
+        if (!isScanning) return;
+        isScanning = false;
+        console.log("Material Scan:", decodedText);
+        let parts = decodedText.trim().split(";");
+        if (parts.length !== 3) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Format',
+                text: "Format must be: MATERIAL;QTY;UOM"
+            });
+            isScanning = true;
+            return;
+        }
+        let item = {
+            material: parts[0].trim(),
+            qty: parts[1].trim(),
+            uom: parts[2].trim(),
+            delivery_number: $("#delivery_number").val()
+        };
+        Swal.fire({
+            title: 'Processing...',
+            text: 'Please wait',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            allowEnterKey: false,
+            didOpen: () => Swal.showLoading()
+        });
 
-                    return {
-                        results: data.items.map(item => ({
-                            id: item.id,
-                            text: item.name
-                        }))
-                    };
-                },
-                cache: true
+        $.ajax({
+            url: "<?= base_url('process/scan_material'); ?>",
+            type: "POST",
+            data: item,
+            dataType: "json",
+            success: function(res) {
+                Swal.close();
+                if (res.status) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: res.message,
+                        timer: 1000,
+                        showConfirmButton: false
+                    });
+                    get_table_material();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: res.message
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                Swal.close();
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Request Failed',
+                    text: error
+                });
+            },
+            complete: function() {
+                setTimeout(() => {
+                    isScanning = true;
+                }, 1200);
             }
         });
     }
 
-    function setSelect2Value(selector, value) {
-        if (value && value !== 'null' && value.trim() !== '') {
-            var opt = new Option(value, value, true, true);
-            $(selector).empty().append(opt).trigger('change');
-        } else {
-            $(selector).val(null).trigger('change');
-        }
+    function onMaterialScanError(errorMessage) {
+        console.warn("Material Scan Error:", errorMessage);
     }
 
+    let html5MaterialScanner = new Html5QrcodeScanner(
+        "reader-material", {
+            fps: 15,
+            qrbox: {
+                width: 250,
+                height: 250
+            }
+        }
+    );
+
+    html5MaterialScanner.render(onMaterialScanSuccess, onMaterialScanError);
+
     $(document).ready(function() {
-        initSelect2Ajax('#material_number', 'Select Material Number', "<?= base_url('select_form/grTempMaterialNumberSelect') ?>");
-        get_table();
-        $('#material_number').on('change', function() {
-            const selected = $(this).val();
-            if (!selected) return;
-
-            $.ajax({
-                url: "<?= base_url('process/modal_material_detail') ?>",
-                type: "GET",
-                data: {
-                    material_number: selected
-                },
-                dataType: "json",
-                success: function(response) {
-                    if (response.success) {
-                        $('#add_material_number').val(response.data.material_number);
-                        $('#add_material_desc').val(response.data.material_desc);
-                        $('#add_uom').val(response.data.uom);
-                    } else {
-                        $('#add_material_number_modal').val(selectedMaterial);
-                        $('#add_material_desc').val('');
-                        $('#add_uom').val('');
-                    }
-                    $('#add_modal').modal('show');
-                },
-                error: function() {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Failed to fetch material details.',
-                    });
-                }
-            });
-
-        });
-
-        $(document).on('click', '.edit-btn', function() {
-            const id = $(this).data('id');
-            const material_number = $(this).data('material_number');
-            const material_desc = $(this).data('material_desc');
-            const qty_order = $(this).data('qty_order');
-            const qty_received = $(this).data('qty_received');
-            const uom = $(this).data('uom');
-
-            $('#edit_id').val(id);
-            $('#edit_material_number').val(material_number);
-            $('#edit_material_desc').val(material_desc);
-            $('#edit_qty_order').val(qty_order);
-            $('#edit_qty_received').val(qty_received);
-            $('#edit_uom').val(uom);
-
-            $('#edit_modal').modal('show');
-        });
-
-        $(document).on('click', '.delete-btn', function() {
-            var id = $(this).data('id');
+        $(document).on("click", ".print-label-btn", function() {
+            let material = $(this).data("material");
+            let qty = $(this).data("qty");
+            let uom = $(this).data("uom");
 
             Swal.fire({
-                title: "Are you sure?",
-                text: "Delete this Material",
-                icon: "warning",
+                title: "Print Label?",
+                html: `
+            <div class="text-center">
+                <b>Material:</b> ${material}<br>
+                <b>Qty:</b> ${qty}<br>
+                <b>UOM:</b> ${uom}
+            </div>
+        `,
+                icon: "question",
                 showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Yes, Confirm!",
-                showLoaderOnConfirm: true,
-                allowOutsideClick: () => !Swal.isLoading(),
-                preConfirm: () => {
-                    return $.ajax({
-                        url: "<?= base_url('process/delete_gr_temp_material') ?>",
-                        type: "POST",
-                        data: {
-                            id: id
-                        },
-                        dataType: "json"
-                    }).then((res) => {
-                        if (!res.status) {
-                            throw new Error(res.message);
-                        }
-                        return res;
-                    }).catch((error) => {
-                        Swal.showValidationMessage(
-                            `Request failed: ${error.message || error}`
-                        );
-                    });
-                }
-            }).then((result) => {
-                if (result.isConfirmed && result.value) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: result.value.message,
-                        timer: 1000,
-                        showConfirmButton: false
-                    }).then(() => {
-                        get_table();
-                    });
+                confirmButtonText: "Print",
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    window.open(
+                        "<?= base_url('process/label') ?>?material=" + material + "&qty=" + qty + "&uom=" + uom,
+                        "_blank"
+                    );
                 }
             });
         });
+
     });
 
-    function get_table() {
+    function check_submit_gr() {
+        let disable_submit = false;
+        $("#table_detail_body tr").each(function() {
+            let statusText = $(this).find("td:nth-child(1)").text().trim().toUpperCase();
+            if (statusText === "OPEN") {
+                disable_submit = true;
+            }
+        });
+        $("#submit_gr").prop("disabled", disable_submit);
+    }
+
+    function get_table_material() {
+        const delivery_number = $('#delivery_number').val();
         if ($.fn.DataTable.isDataTable('#table_detail')) {
             $('#table_detail').DataTable().destroy();
             $('#table_detail tbody').empty();
         }
         $('#table_detail_body').html(`
         <tr id="table_loading">
-            <td colspan="8" class="text-center py-4">
+            <td colspan="6" class="text-center py-4">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
@@ -519,16 +377,60 @@
         $.ajax({
             url: "<?= base_url('process/gr_temp_material_table'); ?>",
             type: "GET",
+            data: {
+                delivery_number: delivery_number
+            },
             dataType: "html",
             success: function(res) {
                 $('#table_detail_body').html(res);
                 initializeDataTable('table_detail');
+                check_submit_gr();
             },
             error: function(xhr, status, error) {
                 console.error("AJAX Error:", error);
                 $('#table_detail_body').html(`
                 <tr>
-                    <td colspan="8" class="text-center text-black p-3">
+                    <td colspan="6" class="text-center text-black p-3">
+                        Failed to load data. Please try again.
+                    </td>
+                </tr>
+            `);
+            }
+        });
+    }
+
+    function get_table_print() {
+        const delivery_number = $('#delivery_number').val();
+        if ($.fn.DataTable.isDataTable('#table_print')) {
+            $('#table_print').DataTable().destroy();
+            $('#table_print tbody').empty();
+        }
+        $('#table_print_detail').html(`
+        <tr id="table_loading">
+            <td colspan="6" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="mt-2 fw-bold text-muted">Loading data...</div>
+            </td>
+        </tr>
+        `);
+        $.ajax({
+            url: "<?= base_url('process/gr_print_detail'); ?>",
+            type: "GET",
+            data: {
+                delivery_number: delivery_number
+            },
+            dataType: "html",
+            success: function(res) {
+                $('#table_print_detail').html(res);
+                initializeDataTable('table_print');
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX Error:", error);
+                $('#table_print_detail').html(`
+                <tr>
+                    <td colspan="6" class="text-center text-black p-3">
                         Failed to load data. Please try again.
                     </td>
                 </tr>
@@ -539,7 +441,7 @@
 
     function initializeDataTable(tableId) {
         let table = $('#' + tableId);
-        $('#' + tableId + ' thead tr.search-row').remove();
+        // $('#' + tableId + ' thead tr.search-row').remove();
 
         // $('#' + tableId + ' thead tr')
         //     .clone(true)
@@ -547,7 +449,7 @@
         //     .appendTo('#' + tableId + ' thead');
 
         // $('#' + tableId + ' thead tr.search-row th').each(function(index) {
-        //     if (index === 6 || index === 0) {
+        //     if (index === 6) {
         //         $(this).html('');
         //     } else {
         //         $(this).html('<input type="text" placeholder="Search" class="form-control form-control-sm" />');
@@ -573,117 +475,9 @@
         });
     }
 
-    $("#form_add").on("submit", function(e) {
+    $("#submit_gr").on("click", function(e) {
         e.preventDefault();
-
-        let dataForm = new FormData(this);
-        // for (const pair of dataForm.entries()) {
-        //     console.log(`${pair[0]}: ${pair[1]}`);
-        // }
-        Swal.fire({
-            title: "Are you sure?",
-            text: "Add this Material",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, Confirm!",
-            showLoaderOnConfirm: true,
-            allowOutsideClick: () => !Swal.isLoading(),
-            preConfirm: () => {
-                return $.ajax({
-                    url: "<?= base_url('process/create_gr_temp_material') ?>",
-                    type: "POST",
-                    data: dataForm,
-                    processData: false,
-                    contentType: false,
-                    dataType: "json"
-                }).then((res) => {
-                    if (!res.status) {
-                        throw new Error(res.message);
-                    }
-                    return res;
-                }).catch((error) => {
-                    Swal.showValidationMessage(
-                        `Request failed: ${error.message || error}`
-                    );
-                });
-            }
-        }).then((result) => {
-            if (result.isConfirmed && result.value) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: result.value.message,
-                    timer: 1000,
-                    showConfirmButton: false
-                }).then(() => {
-                    $('#add_modal').modal('hide');
-                    get_table();
-                });
-            }
-        });
-    });
-
-    $("#form_edit").on("submit", function(e) {
-        e.preventDefault();
-
-        let dataForm = new FormData(this);
-        // for (const pair of dataForm.entries()) {
-        //     console.log(`${pair[0]}: ${pair[1]}`);
-        // }
-        Swal.fire({
-            title: "Are you sure?",
-            text: "Edit this Material",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, Confirm!",
-            showLoaderOnConfirm: true,
-            allowOutsideClick: () => !Swal.isLoading(),
-            preConfirm: () => {
-                return $.ajax({
-                    url: "<?= base_url('process/update_gr_temp_material') ?>",
-                    type: "POST",
-                    data: dataForm,
-                    processData: false,
-                    contentType: false,
-                    dataType: "json"
-                }).then((res) => {
-                    if (!res.status) {
-                        throw new Error(res.message);
-                    }
-                    return res;
-                }).catch((error) => {
-                    Swal.showValidationMessage(
-                        `Request failed: ${error.message || error}`
-                    );
-                });
-            }
-        }).then((result) => {
-            if (result.isConfirmed && result.value) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: result.value.message,
-                    timer: 1000,
-                    showConfirmButton: false
-                }).then(() => {
-                    $('#edit_modal').modal('hide');
-                    get_table();
-                });
-            }
-        });
-    });
-
-    $("#submit_gr").on("submit", function(e) {
-        e.preventDefault();
-
-        let dataForm = new FormData(this);
-        // for (const pair of dataForm.entries()) {
-        //     console.log(`${pair[0]}: ${pair[1]}`);
-        // }
+        const delivery_number = $('#delivery_number').val();
         Swal.fire({
             title: "Are you sure?",
             text: "Submit this Request",
@@ -698,9 +492,9 @@
                 return $.ajax({
                     url: "<?= base_url('process/submit_gr') ?>",
                     type: "POST",
-                    data: dataForm,
-                    processData: false,
-                    contentType: false,
+                    data: {
+                        delivery_number: delivery_number
+                    },
                     dataType: "json"
                 }).then((res) => {
                     if (!res.status) {
@@ -722,7 +516,9 @@
                     timer: 1000,
                     showConfirmButton: false
                 }).then(() => {
-                    get_table();
+                    get_table_print();
+                    $("#section-scan-material").hide();
+                    $("#section-print-material").show();
                 });
             }
         });

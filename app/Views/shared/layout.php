@@ -547,7 +547,7 @@
     <script src="<?= base_url('dist/plugins/DataTables/datatables.min.js') ?>"></script>
     <script src="<?= base_url('dist/plugins/select2-4.0.13/js/select2.full.min.js') ?>"></script>
     <script src="<?= base_url('dist/plugins/sweetalert2/dist/sweetalert2.all.min.js') ?>"></script>
-
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script>
         $(function() {
             $.ajaxSetup({

@@ -13,20 +13,16 @@ class GrHeaderModel extends Model
         'vendor',
         'gr_date',
         'status',
-        'created_by',
-        'created_at',
-        'updated_at'
+        'submited_by',
+        'submited_at',
     ];
-    protected $useTimestamps = true;
-    protected $createdField  = 'created_at';
-    protected $updatedField  = 'updated_at';
     protected $skipValidation = false;
     protected $validationRules = [
         'delivery_number' => 'required|safe_string',
         'vendor' => 'required|safe_string',
         'gr_date' => 'required|valid_date[Y-m-d]',
         'status' => 'required',
-        'created_by' => 'required'
+        'submited_by' => 'required'
     ];
     protected $validationMessages = [
         'delivery_number' => [
@@ -44,7 +40,7 @@ class GrHeaderModel extends Model
         'status' => [
             'required' => 'Status is required',
         ],
-        'created_by' => [
+        'submited_by' => [
             'required' => 'Created by is required',
             'safe_string' => 'Created by contains invalid characters'
         ]
