@@ -31,3 +31,5 @@ $routes->get('process/(:any)', 'Process::$1');
 $routes->post('process/(:any)', 'Process::$1');
 $routes->get('select_form/(:any)', 'Select_form::$1');
 $routes->post('select_form/(:any)', 'Select_form::$1');
+$routes->get('summary/(:any)', 'Summary::$1');
+$routes->post('summary/(:any)', 'Summary::$1');

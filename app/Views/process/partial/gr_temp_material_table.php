@@ -17,15 +17,19 @@ foreach ($item as $i):
     }
 ?>
     <tr>
-        <td class="text-center">
-            <span class="<?= $badge ?>" style="font-size: 0.9rem;">
-                <?= ucfirst(strtolower($status)) ?>
-            </span>
-        </td>
+        <?php if ($type == 'material'): ?>
+            <td class="text-center">
+                <span class="<?= $badge ?>" style="font-size: 0.9rem;">
+                    <?= ucfirst(strtolower($status)) ?>
+                </span>
+            </td>
+        <?php endif; ?>
         <td class="text-center"><?= $i['material_number']; ?></td>
         <td class="text-start"><?= $i['material_desc']; ?></td>
         <td class="text-end"><?= $i['qty_order']; ?></td>
-        <td class="text-end"><?= $i['qty_received']; ?></td>
+        <?php if ($type == 'material'): ?>
+            <td class="text-end"><?= $i['qty_received']; ?></td>
+        <?php endif; ?>
         <td class="text-center"><?= $i['uom']; ?></td>
     </tr>
 <?php endforeach; ?>

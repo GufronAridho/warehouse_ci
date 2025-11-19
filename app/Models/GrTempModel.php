@@ -64,7 +64,7 @@ class GrTempModel extends Model
                 // 'qty_remaining' => max($i['qty_order'] - $i['qty_received'], 0),
                 'qty_remaining' => $i['qty_received'],
                 'uom' => $i['uom'],
-                'status' => 'OPEN',
+                'status' => 'RECEIVED',
                 'staging_location' => $staging_location,
             ];
         }

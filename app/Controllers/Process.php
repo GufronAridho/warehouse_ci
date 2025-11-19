@@ -14,6 +14,7 @@ use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
+use Dompdf\Dompdf;
 
 class Process extends BaseController
 {
@@ -52,9 +53,16 @@ class Process extends BaseController
         return (isset($value) && trim($value) !== '') ? $value : $default;
     }
 
-    public function good_receipt()
+    public function good_receipt_image()
     {
-        return view('process/good_receipt', [
+        return view('process/good_receipt_image', [
+            'title' => 'Good Receipt',
+        ]);
+    }
+
+    public function good_receipt_input()
+    {
+        return view('process/good_receipt_input', [
             'title' => 'Good Receipt',
         ]);
     }
@@ -85,12 +93,14 @@ class Process extends BaseController
         $user = auth()->user();
         $username = $user->username;
         $delivery_number = $this->request->getGet('delivery_number');
+        $type = $this->request->getGet('type');
         $item = $this->GrTempModel->select('tbl_gr_temp.*, b.material_desc')
             ->join('mst_material b', 'tbl_gr_temp.material_number = b.material_number', 'left')
             ->where('tbl_gr_temp.delivery_number', $delivery_number)
             ->findAll();
         $data = [
-            'item' => $item
+            'item' => $item,
+            'type' => $type
         ];
         return view('process/partial/gr_temp_material_table', $data);
     }
@@ -157,7 +167,7 @@ class Process extends BaseController
                     $this->GrTempModel->insert($data);
                 }
 
-                return $this->_json_response(true, 'Materials inserted successfully');
+                return $this->_json_response(true, "Delivery {$delivery_number} has been recorded. You may proceed to material validation.");
             } catch (\Exception $e) {
                 return $this->_json_response(false, $e->getMessage());
             }
@@ -202,7 +212,7 @@ class Process extends BaseController
                 ->where('delivery_number', $delivery_number)
                 ->first();
 
-            $status = "OPEN";
+            $status = "RECEIVED";
             if ($updated['qty_received'] > 0 && $updated['qty_received'] < $updated['qty_order']) {
                 $status = "PARTIAL";
             } elseif ($updated['qty_received'] >= $updated['qty_order']) {
@@ -248,9 +258,9 @@ class Process extends BaseController
                 'delivery_number' => $delivery_number,
                 'vendor' => $temp_gr['vendor'],
                 'gr_date' => date('Y-m-d'),
-                'status' => 'OPEN',
-                'submited_by' => $username,
-                'submited_at' => date('Y-m-d H:i:s'),
+                'status' => 'RECEIVED',
+                'received_by' => $username,
+                'record_date' => date('Y-m-d H:i:s'),
             ];
 
             $db = \Config\Database::connect();
@@ -297,7 +307,7 @@ class Process extends BaseController
         return $this->_json_response(false, 'Invalid request method');
     }
 
-    public function label()
+    public function gr_detail_label()
     {
         $material = $this->request->getGet('material');
         $qty = $this->request->getGet('qty');
@@ -316,20 +326,25 @@ class Process extends BaseController
             data: $qr_content,
             encoding: new Encoding('UTF-8'),
             errorCorrectionLevel: ErrorCorrectionLevel::High,
-            size: 300,
-            margin: 10,
+            size: 200,
+            margin: 5,
             roundBlockSizeMode: RoundBlockSizeMode::Margin
         );
 
         $result = $builder->build();
-
         $qrImage = base64_encode($result->getString());
-
-        return view('process/print/label', [
+        $data = [
             'material' => $material,
             'qty' => $qty,
             'uom' => $uom,
-            'qrImage' => $qrImage
-        ]);
+            'qrImage' => $qrImage,
+        ];
+        $html = view('process/print/gr_detail_label', $data);
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+        $customPaper = [0, 0, 130, 38];
+        $dompdf->setPaper($customPaper);
+        $dompdf->render();
+        $dompdf->stream('gr_detail_label.pdf', ['Attachment' => true]);
     }
 }

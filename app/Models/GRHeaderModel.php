@@ -13,8 +13,8 @@ class GrHeaderModel extends Model
         'vendor',
         'gr_date',
         'status',
-        'submited_by',
-        'submited_at',
+        'received_by',
+        'record_date',
     ];
     protected $skipValidation = false;
     protected $validationRules = [
@@ -22,7 +22,7 @@ class GrHeaderModel extends Model
         'vendor' => 'required|safe_string',
         'gr_date' => 'required|valid_date[Y-m-d]',
         'status' => 'required',
-        'submited_by' => 'required'
+        'received_by' => 'required'
     ];
     protected $validationMessages = [
         'delivery_number' => [
@@ -40,9 +40,9 @@ class GrHeaderModel extends Model
         'status' => [
             'required' => 'Status is required',
         ],
-        'submited_by' => [
-            'required' => 'Created by is required',
-            'safe_string' => 'Created by contains invalid characters'
+        'received_by' => [
+            'required' => 'Received by is required',
+            'safe_string' => 'Received by contains invalid characters'
         ]
     ];
 }

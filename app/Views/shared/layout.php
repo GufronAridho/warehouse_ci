@@ -104,10 +104,17 @@
                 <nav class="mt-2">
                     <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
                         <li class="nav-item">
-                            <a href="<?= base_url('process/good_receipt'); ?>"
-                                class="nav-link <?= (strpos(uri_string(), 'process/good_receipt') === 0) ? 'active' : '' ?>">
+                            <a href="<?= base_url('process/good_receipt_image'); ?>"
+                                class="nav-link <?= (strpos(uri_string(), 'process/good_receipt_image') === 0) ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-truck-loading"></i>
-                                <p>Good Receipt</p>
+                                <p>Good Receipt (Image)</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= base_url('process/good_receipt_input'); ?>"
+                                class="nav-link <?= (strpos(uri_string(), 'process/good_receipt_input') === 0) ? 'active' : '' ?>">
+                                <i class="nav-icon fas fa-truck-loading"></i>
+                                <p>Good Receipt (Input)</p>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -170,6 +177,29 @@
                                 </li>
                             </ul>
                         </li>
+
+                        <li class="nav-item has-treeview <?= (strpos(uri_string(), 'summary') === 0) ? 'menu-open' : '' ?>">
+                            <a href="#" class="nav-link <?= (strpos(uri_string(), 'summary') === 0) ? 'active' : '' ?>">
+                                <i class="nav-icon fas fa-clipboard-list"></i>
+                                <p>
+                                    Summary
+                                    <i class="nav-arrow fas fa-angle-left"></i>
+                                </p>
+                            </a>
+
+                            <ul class="nav nav-treeview" style="<?= (strpos(uri_string(), 'summary') === 0) ? 'display: block;' : '' ?>">
+
+                                <li class="nav-item">
+                                    <a href="<?= base_url('summary/good_receipt_summary'); ?>"
+                                        class="nav-link <?= (uri_string() == 'summary/good_receipt_summary') ? 'active' : '' ?>">
+                                        <i class="fas fa-receipt nav-icon"></i>
+                                        <p>Good Receipt Summary</p>
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </li>
+
                         <li class="nav-item">
                             <a href="<?= base_url('home/change_password'); ?>"
                                 class="nav-link <?= (strpos(uri_string(), 'home/change_password') === 0) ? 'active' : '' ?>">
