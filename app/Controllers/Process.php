@@ -6,9 +6,10 @@ use CodeIgniter\Shield\Entities\User;
 use App\Models\MaterialModel;
 use App\Models\LocationModel;
 use App\Models\StockModel;
+use App\Models\TempGrHeaderModel;
+use App\Models\TempGrDetailModel;
 use App\Models\GrHeaderModel;
 use App\Models\GrDetailModel;
-use App\Models\GrTempModel;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
@@ -24,7 +25,8 @@ class Process extends BaseController
     protected $StockModel;
     protected $GrHeaderModel;
     protected $GrDetailModel;
-    protected $GrTempModel;
+    protected $TempGrHeaderModel;
+    protected $TempGrDetailModel;
 
     public function __construct()
     {
@@ -34,15 +36,18 @@ class Process extends BaseController
         $this->StockModel = new StockModel();
         $this->GrHeaderModel = new GrHeaderModel();
         $this->GrDetailModel = new GrDetailModel();
-        $this->GrTempModel = new GrTempModel();
+        $this->TempGrHeaderModel = new TempGrHeaderModel();
+        $this->TempGrDetailModel = new TempGrDetailModel();
     }
 
-    private function _json_response($status, $message, $is_validation = false)
+    private function _json_response($status, $message, $temp_gr_id = null, $invoice_no = null, $vendor = null)
     {
         return $this->response->setJSON([
             'status' => $status,
             'message' => $message,
-            'is_validation' => $is_validation,
+            'temp_gr_id' => $temp_gr_id,
+            'invoice_no' => $invoice_no,
+            'vendor' => $vendor,
             // 'csrfHash' => csrf_hash()
         ]);
     }
@@ -62,8 +67,18 @@ class Process extends BaseController
 
     public function good_receipt_input()
     {
+        $user = auth()->user();
+        $username = $user->username;
+        $tempHeaders = $this->TempGrHeaderModel->where('username', $username)->findAll();
+        if (!empty($tempHeaders)) {
+            foreach ($tempHeaders as $header) {
+                $this->TempGrDetailModel->where('temp_id', $header['temp_id'])->delete();
+            }
+            $this->TempGrHeaderModel->where('username', $username)->delete();
+        }
         return view('process/good_receipt_input', [
             'title' => 'Good Receipt',
+            'username' => $username,
         ]);
     }
 
@@ -92,11 +107,11 @@ class Process extends BaseController
     {
         $user = auth()->user();
         $username = $user->username;
-        $delivery_number = $this->request->getGet('delivery_number');
+        $temp_gr_id = $this->request->getGet('temp_gr_id');
         $type = $this->request->getGet('type');
-        $item = $this->GrTempModel->select('tbl_gr_temp.*, b.material_desc')
-            ->join('mst_material b', 'tbl_gr_temp.material_number = b.material_number', 'left')
-            ->where('tbl_gr_temp.delivery_number', $delivery_number)
+        $item = $this->TempGrDetailModel->select('tbl_temp_gr_detail.*, b.material_desc')
+            ->join('mst_material b', 'tbl_temp_gr_detail.material_number = b.material_number', 'left')
+            ->where('tbl_temp_gr_detail.temp_id', $temp_gr_id)
             ->findAll();
         $data = [
             'item' => $item,
@@ -107,10 +122,10 @@ class Process extends BaseController
 
     public function gr_print_detail()
     {
-        $delivery_number = $this->request->getGet('delivery_number');
+        $invoice_no = $this->request->getGet('invoice_no');
         $item = $this->GrDetailModel->select('tbl_gr_detail.*, b.material_desc')
             ->join('mst_material b', 'tbl_gr_detail.material_number = b.material_number', 'left')
-            ->where('tbl_gr_detail.delivery_number', $delivery_number)
+            ->where('tbl_gr_detail.invoice_no', $invoice_no)
             ->findAll();
         $data = [
             'item' => $item
@@ -128,6 +143,46 @@ class Process extends BaseController
         ]);
     }
 
+    public function create_temp_gr_header()
+    {
+        if ($this->request->is('post')) {
+            $user = auth()->user();
+            $username = $user->username;
+            $invoice_no = $this->request->getPost('invoice_no');
+            $vendor = $this->request->getPost('vendor');
+
+            $data = [
+                'username' => $username,
+                'invoice_no' => $invoice_no,
+                'vendor' => $vendor,
+                'gr_date' => $this->request->getPost('gr_date'),
+                'lorry_date' => $this->request->getPost('lorry_date'),
+                'type' => $this->request->getPost('type'),
+                'status' => 'OPEN',
+                'record_date' => date('Y-m-d H:i:s')
+            ];
+            try {
+                if ($this->TempGrHeaderModel->insert($data)) {
+                    $temp_gr_id = $this->TempGrHeaderModel->getInsertID();
+                    return $this->_json_response(
+                        true,
+                        'Temporary GR header created.',
+                        $temp_gr_id,
+                        $invoice_no,
+                        $vendor
+                    );
+                } else {
+                    $errors = $this->TempGrHeaderModel->errors();
+                    $message = implode(', ', $errors);
+                    return $this->_json_response(false, $message);
+                }
+            } catch (\Exception $e) {
+                return $this->_json_response(false, $e->getMessage());
+            }
+        }
+        return $this->_json_response(false, 'Invalid request method');
+    }
+
     public function scan_delivery_number()
     {
         if ($this->request->is('post')) {
@@ -136,45 +191,108 @@ class Process extends BaseController
             $username = $user->username;
 
             $items = $this->request->getPost('items');
+            $temp_gr_id = $this->request->getPost('temp_gr_id');
+            $invoice_no = $this->request->getPost('invoice_no');
+
+            if (!$temp_gr_id) {
+                return $this->_json_response(false, 'temp_gr_id is required.');
+            }
 
             if (!$items || !is_array($items)) {
                 return $this->_json_response(false, 'Invalid data format');
             }
 
             try {
+
                 foreach ($items as $row) {
+
                     $delivery_number = $row['delivery_number'];
-                    $material_number = $row['material'];
-                    $exists = $this->GrTempModel
+                    $material_number = $row['material_number'];
+                    $qty_order = floatval($row['qty_order'] ?? 0);
+
+                    $exists = $this->TempGrDetailModel
+                        ->where('temp_id', $temp_gr_id)
                         ->where('delivery_number', $delivery_number)
                         ->where('material_number', $material_number)
                         ->first();
+
                     if ($exists) {
                         continue;
                     }
+
                     $data = [
-                        'delivery_number' =>  $delivery_number,
-                        'material_number' =>  $material_number,
+                        'temp_id' => $temp_gr_id,
+                        'delivery_number' => $delivery_number,
+                        'material_number' => $material_number,
+                        'qty_order' => $qty_order,
                         'qty_received' => 0,
-                        'qty_order' => $row['qty'] ?? 0,
                         'uom' => $row['uom'] ?? '',
-                        'vendor' => $row['vendor'] ?? null,
-                        'status' => 'OPEN',
-                        'created_by' => $username,
-                        'created_at' => date('Y-m-d H:i:s'),
+                        'shipment_id' => $row['shipment_id'] ?? null,
+                        'customer_po' => $row['customer_po'] ?? null,
+                        'customer_po_line' => $row['customer_po_line'] ?? null,
+                        'scanned_by' => $username,
+                        'scanned_at' => date('Y-m-d H:i:s'),
+                        // 'validated_at' => date('Y-m-d H:i:s'),
                     ];
 
-                    $this->GrTempModel->insert($data);
+                    $this->TempGrDetailModel->insert($data);
                 }
 
-                return $this->_json_response(true, "Delivery {$delivery_number} has been recorded. You may proceed to material validation.");
+                return $this->_json_response(true, "Temp GR: {$invoice_no} has been recorded. You may proceed to material validation.");
             } catch (\Exception $e) {
                 return $this->_json_response(false, $e->getMessage());
             }
         }
-
         return $this->_json_response(false, 'Invalid request method');
     }
+
+    // public function scan_delivery_number()
+    // {
+    //     if ($this->request->is('post')) {
+
+    //         $user = auth()->user();
+    //         $username = $user->username;
+
+    //         $items = $this->request->getPost('items');
+
+    //         if (!$items || !is_array($items)) {
+    //             return $this->_json_response(false, 'Invalid data format');
+    //         }
+
+    //         try {
+    //             foreach ($items as $row) {
+    //                 $delivery_number = $row['delivery_number'];
+    //                 $material_number = $row['material'];
+    //                 $exists = $this->GrTempModel
+    //                     ->where('delivery_number', $delivery_number)
+    //                     ->where('material_number', $material_number)
+    //                     ->first();
+    //                 if ($exists) {
+    //                     continue;
+    //                 }
+    //                 $data = [
+    //                     'delivery_number' =>  $delivery_number,
+    //                     'material_number' =>  $material_number,
+    //                     'qty_received' => 0,
+    //                     'qty_order' => $row['qty'] ?? 0,
+    //                     'uom' => $row['uom'] ?? '',
+    //                     'vendor' => $row['vendor'] ?? null,
+    //                     'status' => 'OPEN',
+    //                     'created_by' => $username,
+    //                     'created_at' => date('Y-m-d H:i:s'),
+    //                 ];
+
+    //                 $this->GrTempModel->insert($data);
+    //             }
+
+    //             return $this->_json_response(true, "Delivery {$delivery_number} has been recorded. You may proceed to material validation.");
+    //         } catch (\Exception $e) {
+    //             return $this->_json_response(false, $e->getMessage());
+    //         }
+    //     }
+
+    //     return $this->_json_response(false, 'Invalid request method');
+    // }
 
     public function scan_material()
     {
@@ -185,13 +303,13 @@ class Process extends BaseController
             $material = $this->request->getPost('material');
             $qty = $this->request->getPost('qty');
             $uom = $this->request->getPost('uom');
-            $delivery_number = $this->request->getPost('delivery_number');
+            $delivery_number = $this->request->getPost('delivery');
 
             if (!$material || !$qty || !$uom || !$delivery_number) {
                 return $this->_json_response(false, "Missing fields");
             }
 
-            $exists = $this->GrTempModel
+            $exists = $this->TempGrDetailModel
                 ->where('material_number', $material)
                 ->where('delivery_number', $delivery_number)
                 ->first();
@@ -200,30 +318,16 @@ class Process extends BaseController
                 return $this->_json_response(false, "Material not found in DO list");
             }
 
-            $this->GrTempModel->where('material_number', $material)
+            $this->TempGrDetailModel->where('material_number', $material)
                 ->where('delivery_number', $delivery_number)
                 ->set('qty_received', "qty_received + $qty", false)
-                ->set('validated_by', $username)
                 ->set('validated_at', date('Y-m-d H:i:s'))
                 ->update();
 
-            $updated = $this->GrTempModel
+            $updated = $this->TempGrDetailModel
                 ->where('material_number', $material)
                 ->where('delivery_number', $delivery_number)
                 ->first();
-
-            $status = "RECEIVED";
-            if ($updated['qty_received'] > 0 && $updated['qty_received'] < $updated['qty_order']) {
-                $status = "PARTIAL";
-            } elseif ($updated['qty_received'] >= $updated['qty_order']) {
-                $status = "COMPLETE";
-            }
-
-            $this->GrTempModel
-                ->where('material_number', $material)
-                ->where('delivery_number', $delivery_number)
-                ->set('status', $status)
-                ->update();
 
             return $this->_json_response(true, "Material validated successfully");
         }
@@ -231,17 +335,44 @@ class Process extends BaseController
         return $this->_json_response(false, "Invalid request");
     }
 
+    public function delete_temp_detail()
+    {
+        if ($this->request->is('post')) {
+            $id = $this->request->getPost('id');
+            if (empty($id)) {
+                return $this->_json_response(false, 'Missing ID.');
+            }
+            try {
+                if ($this->TempGrDetailModel->delete($id)) {
+                    return $this->_json_response(true, 'Material deleted successfully');
+                } else {
+                    return $this->_json_response(false, 'Failed to delete Material');
+                }
+            } catch (\Exception $e) {
+                return $this->_json_response(false, $e->getMessage());
+            }
+        }
+
+        return $this->_json_response(false, 'Invalid request method');
+    }
+
     public function submit_gr()
     {
         if ($this->request->is('post')) {
             $user = auth()->user();
             $username = $user->username;
-            $delivery_number = $this->request->getPost('delivery_number');
-
-            $temp_gr = $this->GrTempModel
-                ->where('delivery_number', $delivery_number)
-                ->first();
-
+            $temp_gr_id = $this->request->getPost('temp_gr_id');
+            if (!$temp_gr_id) {
+                return $this->_json_response(false, 'Missing temporary GR ID.');
+            }
+            $tempHeader = $this->TempGrHeaderModel->where('temp_id', $temp_gr_id)->first();
+            if (!$tempHeader) {
+                return $this->_json_response(false, 'Temporary GR header not found.');
+            }
+            $tempDetails = $this->TempGrDetailModel->where('temp_id', $temp_gr_id)->findAll();
+            if (empty($tempDetails)) {
+                return $this->_json_response(false, 'No scanned materials found.');
+            }
             $staging = $this->LocationModel
                 ->where('storage_type', 'STAGING')
                 ->where('is_active', 1)
@@ -254,47 +385,64 @@ class Process extends BaseController
             $rack =  $staging['rack'];
             $bin =  $staging['bin'];
 
-            $data = [
-                'delivery_number' => $delivery_number,
-                'vendor' => $temp_gr['vendor'],
-                'gr_date' => date('Y-m-d'),
-                'status' => 'RECEIVED',
+            $headerData = [
+                'vendor' => $tempHeader['vendor'],
+                'invoice_no' => $tempHeader['invoice_no'],
+                'gr_date' => $tempHeader['gr_date'],
+                'lorry_date' => $tempHeader['lorry_date'],
+                'type' => $tempHeader['type'],
                 'received_by' => $username,
-                'record_date' => date('Y-m-d H:i:s'),
+                'status' => 'RECEIVED',
+                'record_date' => $tempHeader['record_date'],
             ];
 
             $db = \Config\Database::connect();
             $db->transStart();
 
             try {
-                if ($this->GrHeaderModel->insert($data)) {
-                    $insert_detail = $this->GrTempModel->save_detail(
-                        $delivery_number,
-                        $staging_location
-                    );
-                    if ($insert_detail) {
-                        $detail = $this->GrDetailModel
-                            ->where('delivery_number', $delivery_number)
-                            ->findAll();
-                        if (empty($detail)) {
-                            $db->transRollback();
-                            return $this->_json_response(false, 'No GR Detail found after insert.');
-                        }
-                        foreach ($detail as $item) {
-                            $this->StockModel->update_stock(
-                                $item['material_number'],
-                                $item['qty_received'],
-                                $staging_location,
-                                $rack,
-                                $bin,
-                            );
-                        }
+                if ($this->GrHeaderModel->insert($headerData)) {
+                    $gr_header_id = $this->GrHeaderModel->getInsertID();
+                    foreach ($tempDetails as $item) {
+
+                        $detailData = [
+                            'gr_id' => $gr_header_id,
+                            'invoice_no' => $tempHeader['invoice_no'],
+                            'delivery_number' => $item['delivery_number'],
+                            'material_number' => $item['material_number'],
+                            'qty_order' => $item['qty_order'],
+                            'qty_received' => $item['qty_received'],
+                            'qty_remaining' => $item['qty_order'] - $item['qty_received'],
+                            'uom' => $item['uom'],
+                            'shipment_id' => $item['shipment_id'],
+                            'customer_po' => $item['customer_po'],
+                            'customer_po_line' => $item['customer_po_line'],
+                            'staging_location' => $staging_location,
+                            'status' => 'RECEIVED',
+                            'scanned_by' => $item['scanned_by'],
+                            'scanned_at' => $item['scanned_at'],
+                            'validated_at' => $item['validated_at'],
+                        ];
+
+                        $this->GrDetailModel->insert($detailData);
+
+                        $this->StockModel->update_stock(
+                            $item['material_number'],
+                            $item['qty_received'],
+                            $staging_location,
+                            $rack,
+                            $bin
+                        );
                     }
                     $db->transComplete();
                     if ($db->transStatus() === false) {
                         return $this->_json_response(false, 'Transaction failed.');
                     }
-                    return $this->_json_response(true, 'Goods Receipt submitted successfully.');
+                    return $this->_json_response(
+                        true,
+                        'Goods Receipt submitted successfully.',
+                        null,
+                        $tempHeader['invoice_no']
+                    );
                 }
                 $errors = $this->GrHeaderModel->errors();
                 $message = implode(', ', $errors);
@@ -312,12 +460,13 @@ class Process extends BaseController
         $material = $this->request->getGet('material');
         $qty = $this->request->getGet('qty');
         $uom = $this->request->getGet('uom');
+        $delivery = $this->request->getGet('delivery');
 
-        if (!$material || !$qty || !$uom) {
+        if (!$material || !$qty || !$uom || !$delivery) {
             return "Missing parameters!";
         }
 
-        $qr_content = "{$material};{$qty};{$uom}";
+        $qr_content = "{$delivery};{$material};{$qty};{$uom}";
 
         $builder = new Builder(
             writer: new PngWriter(),
@@ -345,6 +494,52 @@ class Process extends BaseController
         $customPaper = [0, 0, 130, 38];
         $dompdf->setPaper($customPaper);
         $dompdf->render();
-        $dompdf->stream('gr_detail_label.pdf', ['Attachment' => true]);
+        $dompdf->stream("{$delivery}_{$material}_label.pdf", ['Attachment' => true]);
+    }
+
+    public function print_pallet_id()
+    {
+        $invoice_no = $this->request->getGet('invoice_no');
+        $vendor = $this->request->getGet('vendor');
+
+        if (!$invoice_no || !$vendor) {
+            return "Missing parameters!";
+        }
+
+
+        $qr_content = "{$invoice_no};{$vendor}";
+
+        $builder = new Builder(
+            writer: new PngWriter(),
+            writerOptions: [],
+            validateResult: false,
+            data: $qr_content,
+            encoding: new Encoding('UTF-8'),
+            errorCorrectionLevel: ErrorCorrectionLevel::High,
+            size: 380,
+            margin: 10,
+            roundBlockSizeMode: RoundBlockSizeMode::Margin
+        );
+
+        $result = $builder->build();
+        $qrImage = base64_encode($result->getString());
+
+        $data = [
+            'invoice_no' => $invoice_no,
+            'vendor' => $vendor,
+            'qrImage' => $qrImage,
+        ];
+
+        $html = view('process/print/pallet_id_label', $data);
+
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+
+        // Bigger label = 180mm × 70mm
+        $customPaper = [0, 0, 510, 200];
+        $dompdf->setPaper($customPaper);
+
+        $dompdf->render();
+        $dompdf->stream("{$invoice_no}_pallet_label.pdf", ['Attachment' => true]);
     }
 }

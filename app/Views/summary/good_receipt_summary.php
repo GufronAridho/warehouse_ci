@@ -43,9 +43,11 @@
                     <table class="table table-bordered table-striped table-hover table-custom" id="table_header">
                         <thead>
                             <tr>
-                                <th class="text-center">Delivery No</th>
+                                <th class="text-center">Invoice No</th>
                                 <th class="text-center">Vendor</th>
                                 <th class="text-center">GR Date</th>
+                                <th class="text-center">Lorry Date</th>
+                                <th class="text-center">Type</th>
                                 <th class="text-center">Status</th>
                                 <th class="text-center">Received By</th>
                                 <th class="text-center">Action</th>
@@ -74,13 +76,20 @@
                 <table class="table table-bordered table-striped table-hover table-custom" id="table_detail">
                     <thead>
                         <tr>
+                            <th class="text-center">Delivery Number</th>
                             <th class="text-center">Material Number</th>
-                            <th class="text-center">Qty Received</th>
                             <th class="text-center">Qty Ordered</th>
+                            <th class="text-center">Qty Received</th>
                             <th class="text-center">Qty Remaining</th>
                             <th class="text-center">UOM</th>
+                            <th class="text-center">Shipment ID</th>
+                            <th class="text-center">Customer PO</th>
+                            <th class="text-center">Customer PO Line</th>
                             <th class="text-center">Staging Location</th>
                             <th class="text-center">Status</th>
+                            <th class="text-center">Scanned By</th>
+                            <th class="text-center">Scanned At</th>
+                            <th class="text-center">Validated At</th>
                             <th class="text-center">Action</th>
                         </tr>
                     </thead>
@@ -114,7 +123,7 @@
 
             $('#table_detail_body').html(`
             <tr id="table_loading">
-                <td colspan="8" class="text-center py-4">
+                <td colspan="15" class="text-center py-4">
                     <div class="spinner-border text-primary"></div>
                     <div class="mt-2 fw-bold text-muted">Loading data...</div>
                 </td>
@@ -136,7 +145,7 @@
                 error: function() {
                     $('#table_detail_body').html(`
                     <tr>
-                        <td colspan="8" class="text-center text-danger p-3">
+                        <td colspan="15" class="text-center text-danger p-3">
                             Failed to load data. Please try again.
                         </td>
                     </tr>
@@ -147,6 +156,7 @@
         });
 
         $(document).on("click", ".print-label-btn", function() {
+            let delivery = $(this).data("delivery");
             let material = $(this).data("material");
             let qty = $(this).data("qty");
             let uom = $(this).data("uom");
@@ -155,6 +165,7 @@
                 title: "Print Label?",
                 html: `
             <div class="text-center">
+                <b>Delivery:</b> ${delivery}<br>
                 <b>Material:</b> ${material}<br>
                 <b>Qty:</b> ${qty}<br>
                 <b>UOM:</b> ${uom}
@@ -166,7 +177,7 @@
             }).then((res) => {
                 if (res.isConfirmed) {
                     window.open(
-                        "<?= base_url('process/gr_detail_label') ?>?material=" + material + "&qty=" + qty + "&uom=" + uom,
+                        "<?= base_url('process/gr_detail_label') ?>?material=" + material + "&qty=" + qty + "&uom=" + uom + "&delivery=" + delivery,
                         "_blank"
                     );
                 }
@@ -182,7 +193,7 @@
 
         $('#table_header_body').html(`
             <tr id="table_loading">
-                <td colspan="6" class="text-center py-4">
+                <td colspan="8" class="text-center py-4">
                     <div class="spinner-border text-primary"></div>
                     <div class="mt-2 fw-bold text-muted">Loading data...</div>
                 </td>
@@ -200,7 +211,7 @@
             error: function() {
                 $('#table_header_body').html(`
                     <tr>
-                        <td colspan="6" class="text-center text-danger p-3">
+                        <td colspan="8" class="text-center text-danger p-3">
                             Failed to load data. Please try again.
                         </td>
                     </tr>
@@ -220,13 +231,13 @@
 
         $('#' + tableId + ' thead tr.search-row th').each(function(index) {
             if (tableId == 'table_header') {
-                if (index === 5) {
+                if (index === 7) {
                     $(this).html('');
                 } else {
                     $(this).html('<input type="text" placeholder="Search" class="form-control form-control-sm" />');
                 }
             } else {
-                if (index === 7) {
+                if (index === 14) {
                     $(this).html('');
                 } else {
                     $(this).html('<input type="text" placeholder="Search" class="form-control form-control-sm" />');

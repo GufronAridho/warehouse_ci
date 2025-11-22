@@ -11,72 +11,7 @@
 
             <div class="card shadow-sm rounded-3 card-table mb-3 mt-3">
 
-                <div id="section-create-header">
-                    <div class="card-header text-center custom-card-purple">
-                        <h5 class="m-0" style="color:#FFD700;">
-                            <i class="fas fa-file-invoice me-2"></i> Create New GR
-                        </h5>
-                    </div>
-
-                    <ul class="nav nav-tabs custom-tabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" type="button" role="tab">
-                                <i class="fas fa-file-invoice me-1"></i> GR Header
-                            </button>
-                        </li>
-                    </ul>
-                    <form id="create_gr">
-                        <div class="card-body">
-                            <div class="row g-2 mb-2">
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">Document Date</label>
-                                    <input type="date" name="gr_date" id="date_doc" class="form-control" readonly>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">Lorry Date</label>
-                                    <input type="date" name="lorry_date" id="lorry_date" class="form-control" required>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">Type</label>
-                                    <select name="type" id="delivery_type" class="form-control" required>
-                                        <option value="">-- Select Type --</option>
-                                        <option value="NORMAL">NORMAL</option>
-                                        <option value="URGENT">URGENT</option>
-                                        <option value="RETURN">RETURN</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="row g-2 mb-2">
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">Invoice No</label>
-                                    <input type="text" name="invoice_no" id="invoice_no" class="form-control" placeholder="Enter Invoice Number" required>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">Vendor</label>
-                                    <input type="text" name="vendor" id="vendor" class="form-control" placeholder="Enter Vendor" required>
-                                </div>
-
-                                <div class="col-md-4">
-                                    <label class="form-label fw-bold">Username</label>
-                                    <input type="text" name="username" id="username" class="form-control"
-                                        value="<?= auth()->user()->username; ?>" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card-footer d-flex justify-content-end">
-                            <button type="submit" class="btn btn-primary" id="start_scan_delivery">
-                                <i class="fas fa-check"></i> Create GR
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <div id="section-scan-delivery" style="display:none">
+                <div id="section-scan-delivery">
                     <div class="card-header text-center custom-card-purple">
                         <h5 class="m-0" style="color:#FFD700;">
                             <i class="fas fa-file-invoice me-2"></i> Scan Delivery QR
@@ -96,16 +31,12 @@
                                 <textarea id="scanner-input" class="form-control" rows="4" placeholder="Scan Delivery Here" autofocus></textarea>
                             </div>
                         </div>
-                        <table class="table table-bordered table-hover table-custom" id="table_delivery_detail" style="display: none;">
+                        <table class="table table-bordered table-striped table-hover table-custom" id="table_delivery_detail" style="display: none;">
                             <thead>
                                 <tr>
-                                    <th class="text-center">Delivery Number</th>
                                     <th class="text-center">Material Number</th>
                                     <th class="text-end">Qty Ordered</th>
                                     <th class="text-center">UOM</th>
-                                    <th class="text-center">Shipment ID</th>
-                                    <th class="text-center">Customer PO</th>
-                                    <th class="text-center">PO Line</th>
                                 </tr>
                             </thead>
                             <tbody id="table_delivery_detail_body">
@@ -136,11 +67,10 @@
                         <div class="d-flex justify-content-center">
                             <input type="text" id="material-input" class="form-control" placeholder="Scan Material Here" autofocus>
                         </div>
-                        <table class="table table-bordered table-hover table-custom" id="table_material_detail">
+                        <table class="table table-bordered table-striped table-hover table-custom" id="table_material_detail">
                             <thead>
                                 <tr>
-                                    <th class="text-center"></th>
-                                    <th class="text-center">Delivery Number</th>
+                                    <th class="text-center">Status</th>
                                     <th class="text-center">Material Number</th>
                                     <th class="text-center">Material Description</th>
                                     <th class="text-end">Qty Ordered</th>
@@ -177,7 +107,6 @@
                         <table class="table table-bordered table-striped table-hover table-custom" id="table_print">
                             <thead>
                                 <tr>
-                                    <th class="text-center">Delivery Number</th>
                                     <th class="text-center">Material Number</th>
                                     <th class="text-center">Material Description</th>
                                     <th class="text-end">Qty Ordered</th>
@@ -190,11 +119,6 @@
 
                             </tbody>
                         </table>
-                    </div>
-                    <div class="card-footer d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary" onclick="print_pallet_id()">
-                            <i class="fas fa-print me-1"></i> Print Pallet Label
-                        </button>
                     </div>
                 </div>
 
@@ -224,130 +148,55 @@
         border-bottom: 3px solid #5f0188;
         font-weight: 600;
     }
-
-    table.dataTable tbody tr.table-open td {
-        background-color: #ff7a87ff !important;
-    }
-
-    table.dataTable tbody tr.table-partial td {
-        background-color: #ffd36b !important;
-    }
-
-    table.dataTable tbody tr.table-complete td {
-        background-color: #9ee6a0 !important;
-    }
 </style>
 <?= $this->endSection() ?>
 
 <?= $this->section('script'); ?>
 <script>
-    $("#create_gr").on("submit", function(e) {
-        e.preventDefault();
-
-        let dataForm = new FormData(this);
-
-        Swal.fire({
-            title: "Are you sure?",
-            text: "Create this GR Header?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, Confirm!",
-            showLoaderOnConfirm: true,
-            allowOutsideClick: () => !Swal.isLoading(),
-            preConfirm: () => {
-
-                return $.ajax({
-                    url: "<?= base_url('process/create_temp_gr_header') ?>",
-                    type: "POST",
-                    data: dataForm,
-                    processData: false,
-                    contentType: false,
-                    dataType: "json"
-                }).then((res) => {
-                    if (!res.status) {
-                        throw new Error(res.message);
-                    }
-                    return res;
-                }).catch((error) => {
-                    Swal.showValidationMessage(
-                        `Request failed: ${error.message || error}`
-                    );
-                });
-
-            }
-        }).then((result) => {
-            if (result.isConfirmed && result.value) {
-                console.log(result.value)
-
-                window.temp_gr_id = result.value.temp_gr_id;
-                window.invoice_no = result.value.invoice_no;
-                window.vendor = result.value.vendor;
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: result.value.message,
-                    timer: 3000,
-                    showConfirmButton: false
-                }).then(() => {
-                    $("#section-create-header").hide();
-                    $("#section-scan-delivery").show();
-                });
-
-            }
-        });
-    });
-
     let scannedItems = [];
 
     function processScannedData(decodedText) {
-        console.log(`Scan result raw:`, decodedText);
 
-        decodedText = decodedText.trim();
+        console.log(`Scan result: ${decodedText}`);
 
-        let lines = decodedText.split(";")
-            .map(x => x.trim())
-            .filter(x => x !== "");
+        let lines = decodedText.trim().split(";").filter(x => x.trim() !== "");
 
-        console.log("After cleaning:", lines);
+        // scannedItems = []
+        let isValid = true;
 
-        if (lines.length % 7 !== 0) {
-            let expectedFormat =
-                "delivery_number;material_number;qty_order;uom;shipment_id;customer_po;customer_po_line";
+        const formatRegex = /^([^;]+);([^;]+);([^;]+);([^;]+);([^;]+)$/;
 
-            Swal.fire({
-                icon: 'error',
-                title: 'Invalid Scan Format',
-                html: `
-                <b>Your scanned data is incorrect.</b><br><br>
-                <b>Expected 7 fields per item:</b><br>
-                <code>${expectedFormat}</code><br><br>
+        lines.forEach((line, index) => {
+            line = line.trim();
 
-                <b>Example:</b><br>
-                <code>DEL-0011;MAT-1001;10;PCS;SHIP001;PO12345;10</code><br><br>
+            if (!formatRegex.test(line)) {
+                isValid = false;
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Scan Format',
+                    html: `Line <b>${index + 1}</b> is not valid:<br><code>${line}</code><br><br>
+                    Expected: <code>DELIVERY;MATERIAL;QTY;UOM;VENDOR</code>`
+                });
+                $("#scanner-input").val('');
+                return;
+            }
 
-                <b>But your scan contains:</b><br>
-                <code>${decodedText}</code>`
-            });
-            return;
-        }
+            let parts = line.split(";");
 
-        // scannedItems = [];
-        for (let i = 0; i < lines.length; i += 7) {
             scannedItems.push({
-                delivery_number: lines[i],
-                material_number: lines[i + 1],
-                qty_order: lines[i + 2],
-                uom: lines[i + 3],
-                shipment_id: lines[i + 4],
-                customer_po: lines[i + 5],
-                customer_po_line: lines[i + 6]
+                delivery_number: parts[0].trim(),
+                material: parts[1].trim(),
+                qty: parts[2].trim(),
+                uom: parts[3].trim(),
+                vendor: parts[4].trim()
             });
-        }
+        });
 
-        console.log("Parsed items:", scannedItems);
+        let deliveryNumbers = scannedItems.map(x => x.delivery_number);
+        let uniqueDeliveryNumbers = [...new Set(deliveryNumbers)];
+
+        if (!isValid) return;
+        $("#delivery_number").val(scannedItems[0].delivery_number);
         get_table_delivery_local(scannedItems);
         $("#table_delivery_detail").show();
         $("#input_delivery").hide();
@@ -355,20 +204,14 @@
         $("#scanner-input").val('');
     }
 
-
     function get_table_delivery_local(items) {
         let html = "";
-
         items.forEach(item => {
             html += `
             <tr>
-                <td class="text-center">${item.delivery_number}</td>
-                <td class="text-center">${item.material_number}</td>
-                <td class="text-end">${item.qty_order}</td>
+                <td class="text-center">${item.material}</td>
+                <td class="text-end">${item.qty}</td>
                 <td class="text-center">${item.uom}</td>
-                <td class="text-center">${item.shipment_id}</td>
-                <td class="text-center">${item.customer_po}</td>
-                <td class="text-center">${item.customer_po_line}</td>
             </tr>
         `;
         });
@@ -393,8 +236,8 @@
             html: `
         You scanned <b>${scannedItems.length}</b> item(s).<br><br>
         <div class="text-center">
-            <b>Invoice Number:</b> ${window.invoice_no}<br>
-            <b>Vendor:</b> ${window.vendor}
+            <b>Delivery Number:</b> ${scannedItems[0].delivery_number}<br>
+            <b>Vendor:</b> ${scannedItems[0].vendor}
         </div>
     `,
             icon: 'question',
@@ -414,11 +257,10 @@
                     url: "<?= base_url('process/scan_delivery_number'); ?>",
                     type: "POST",
                     data: {
-                        items: scannedItems,
-                        temp_gr_id: window.temp_gr_id,
-                        invoice_no: window.invoice_no
+                        items: scannedItems
                     },
                     dataType: "json",
+
                     success: function(res) {
                         Swal.close();
 
@@ -427,7 +269,7 @@
                                 icon: 'success',
                                 title: 'Success',
                                 text: res.message,
-                                timer: 3000,
+                                timer: 1000,
                                 showConfirmButton: false
                             });
 
@@ -443,6 +285,7 @@
                             });
                         }
                     },
+
                     error: function(xhr, status, error) {
                         Swal.close();
                         Swal.fire({
@@ -459,17 +302,15 @@
 
     function processMaterialScan(decodedText) {
         console.log("Material Scan:", decodedText);
-
         let line = decodedText.trim();
-
-        const formatRegex = /^([^;]+);([^;]+);([^;]+);([^;]+)$/;
+        const formatRegex = /^([^;]+);([^;]+);([^;]+)$/;
         if (!formatRegex.test(line)) {
             Swal.fire({
                 icon: 'error',
                 title: 'Invalid Format',
                 html: `Scanned data is invalid:<br>
                    <code>${line}</code><br><br>
-                   Expected: <code>delivery_number;material_number;qty_order;uom</code>`
+                   Expected: <code>MATERIAL;QTY;UOM</code>`
             });
 
             $("#material-input").val('').focus();
@@ -477,10 +318,10 @@
         }
         let parts = line.split(";");
         let item = {
-            delivery: parts[0].trim(),
-            material: parts[1].trim(),
-            qty: parts[2].trim(),
-            uom: parts[3].trim(),
+            material: parts[0].trim(),
+            qty: parts[1].trim(),
+            uom: parts[2].trim(),
+            delivery_number: $("#delivery_number").val()
         };
         Swal.fire({
             title: 'Processing...',
@@ -497,7 +338,6 @@
             dataType: "json",
             success: function(res) {
                 Swal.close();
-
                 if (res.status) {
                     Swal.fire({
                         icon: 'success',
@@ -530,9 +370,7 @@
     }
 
     $(document).ready(function() {
-        let today = new Date().toISOString().split("T")[0];
-        $("#date_doc").val(today);
-        $("#lorry_date").val(today);
+
         $(document).on('click', '#process-scan', function() {
             const scannedText = $("#scanner-input").val().trim();
             if (scannedText) {
@@ -579,55 +417,7 @@
             }
         });
 
-        $(document).on('click', '.delete-btn', function() {
-            var id = $(this).data('id');
-
-            Swal.fire({
-                title: "Are you sure?",
-                text: "Delete this Material!!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Yes, Confirm!",
-                showLoaderOnConfirm: true,
-                allowOutsideClick: () => !Swal.isLoading(),
-                preConfirm: () => {
-                    return $.ajax({
-                        url: "<?= base_url('process/delete_temp_detail') ?>",
-                        type: "POST",
-                        data: {
-                            id: id
-                        },
-                        dataType: "json"
-                    }).then((res) => {
-                        if (!res.status) {
-                            throw new Error(res.message);
-                        }
-                        return res;
-                    }).catch((error) => {
-                        Swal.showValidationMessage(
-                            `Request failed: ${error.message || error}`
-                        );
-                    });
-                }
-            }).then((result) => {
-                if (result.isConfirmed && result.value) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: result.value.message,
-                        timer: 1000,
-                        showConfirmButton: false
-                    }).then(() => {
-                        get_table_material();
-                    });
-                }
-            });
-        });
-
         $(document).on("click", ".print-label-btn", function() {
-            let delivery = $(this).data("delivery");
             let material = $(this).data("material");
             let qty = $(this).data("qty");
             let uom = $(this).data("uom");
@@ -636,7 +426,6 @@
                 title: "Print Label?",
                 html: `
             <div class="text-center">
-                <b>Delivery:</b> ${delivery}<br>
                 <b>Material:</b> ${material}<br>
                 <b>Qty:</b> ${qty}<br>
                 <b>UOM:</b> ${uom}
@@ -648,7 +437,7 @@
             }).then((res) => {
                 if (res.isConfirmed) {
                     window.open(
-                        "<?= base_url('process/gr_detail_label') ?>?material=" + material + "&qty=" + qty + "&uom=" + uom + "&delivery=" + delivery,
+                        "<?= base_url('process/gr_detail_label') ?>?material=" + material + "&qty=" + qty + "&uom=" + uom,
                         "_blank"
                     );
                 }
@@ -660,7 +449,8 @@
     function check_submit_gr() {
         let disable_submit = false;
         $("#table_material_detail_body tr").each(function() {
-            if ($(this).hasClass("table-danger")) {
+            let statusText = $(this).find("td:nth-child(1)").text().trim().toUpperCase();
+            if (statusText === "OPEN") {
                 disable_submit = true;
             }
         });
@@ -668,14 +458,14 @@
     }
 
     function get_table_material() {
-
+        const delivery_number = $('#delivery_number').val();
         if ($.fn.DataTable.isDataTable('#table_material_detail')) {
             $('#table_material_detail').DataTable().destroy();
             $('#table_material_detail tbody').empty();
         }
         $('#table_material_detail_body').html(`
         <tr id="table_loading">
-            <td colspan="7" class="text-center py-4">
+            <td colspan="6" class="text-center py-4">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
@@ -687,7 +477,7 @@
             url: "<?= base_url('process/gr_temp_material_table'); ?>",
             type: "GET",
             data: {
-                temp_gr_id: window.temp_gr_id,
+                delivery_number: delivery_number,
                 type: 'material'
             },
             dataType: "html",
@@ -700,7 +490,7 @@
                 console.error("AJAX Error:", error);
                 $('#table_material_detail_body').html(`
                 <tr>
-                    <td colspan="7" class="text-center text-black p-3">
+                    <td colspan="6" class="text-center text-black p-3">
                         Failed to load data. Please try again.
                     </td>
                 </tr>
@@ -710,13 +500,14 @@
     }
 
     function get_table_print() {
+        const delivery_number = $('#delivery_number').val();
         if ($.fn.DataTable.isDataTable('#table_print')) {
             $('#table_print').DataTable().destroy();
             $('#table_print tbody').empty();
         }
         $('#table_print_detail').html(`
         <tr id="table_loading">
-            <td colspan="7" class="text-center py-4">
+            <td colspan="6" class="text-center py-4">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
@@ -728,7 +519,7 @@
             url: "<?= base_url('process/gr_print_detail'); ?>",
             type: "GET",
             data: {
-                invoice_no: window.invoice_no,
+                delivery_number: delivery_number
             },
             dataType: "html",
             success: function(res) {
@@ -739,7 +530,7 @@
                 console.error("AJAX Error:", error);
                 $('#table_print_detail').html(`
                 <tr>
-                    <td colspan="7" class="text-center text-black p-3">
+                    <td colspan="6" class="text-center text-black p-3">
                         Failed to load data. Please try again.
                     </td>
                 </tr>
@@ -786,7 +577,7 @@
 
     $("#submit_gr").on("click", function(e) {
         e.preventDefault();
-
+        const delivery_number = $('#delivery_number').val();
         Swal.fire({
             title: "Are you sure?",
             text: "Submit this Request",
@@ -802,7 +593,7 @@
                     url: "<?= base_url('process/submit_gr') ?>",
                     type: "POST",
                     data: {
-                        temp_gr_id: window.temp_gr_id,
+                        delivery_number: delivery_number
                     },
                     dataType: "json"
                 }).then((res) => {
@@ -822,23 +613,15 @@
                     icon: 'success',
                     title: 'Success',
                     text: result.value.message,
-                    timer: 3000,
+                    timer: 1000,
                     showConfirmButton: false
                 }).then(() => {
                     get_table_print();
                     $("#section-scan-material").hide();
                     $("#section-print-material").show();
-                    print_pallet_id();
                 });
             }
         });
     });
-
-    function print_pallet_id() {
-        window.open(
-            "<?= base_url('process/print_pallet_id') ?>?invoice_no=" + window.invoice_no + "&vendor=" + window.vendor,
-            "_blank"
-        );
-    }
 </script>
 <?= $this->endSection() ?>

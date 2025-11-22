@@ -24,7 +24,7 @@
         }
 
         .text {
-            font-size: 7px;
+            font-size: 10px;
             /* very small text */
             line-height: 1.0;
             padding-left: 2px;

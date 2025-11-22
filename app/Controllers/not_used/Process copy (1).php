@@ -227,11 +227,15 @@ class Process_copy extends BaseController
 
             try {
                 if ($this->GrHeaderModel->insert($data)) {
+
+                    $gr_header_id = $this->GrHeaderModel->getInsertID();
+
                     $insert_detail = $this->GrTempModel->save_detail(
                         $delivery_number,
-                        $username,
-                        $staging_location
+                        $staging_location,
+                        $gr_header_id
                     );
+
                     if ($insert_detail) {
                         $detail = $this->GrDetailModel
                             ->where('delivery_number', $delivery_number)

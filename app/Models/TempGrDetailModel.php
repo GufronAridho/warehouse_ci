@@ -4,23 +4,37 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class GrTempModel extends Model
+class TempGrDetailModel extends Model
 {
-    protected $table = 'tbl_gr_temp';
-    protected $primaryKey = 'id';
+    protected $table = 'tbl_temp_gr_detail';
+    protected $primaryKey = 'temp_detail_id';
+
     protected $allowedFields = [
+        'temp_id',
         'delivery_number',
-        'vendor',
         'material_number',
-        'qty_received',
         'qty_order',
+        'qty_received',
+        // 'qty_remaining',
         'uom',
-        'status',
-        'created_by',
-        'created_at',
-        'validated_by',
-        'validated_at',
+        'shipment_id',
+        'customer_po',
+        'customer_po_line',
+        // 'status',
+        'scanned_by',
+        'scanned_at',
+        'validated_at'
     ];
+
+    // protected $validationRules = [
+    //     'temp_id'         => 'required|integer',
+    //     'delivery_number' => 'required|safe_string',
+    //     'material_number' => 'required|safe_string',
+    //     'qty_order'       => 'permit_empty|decimal',
+    //     'qty_received'    => 'permit_empty|decimal',
+    //     'qty_remaining'   => 'permit_empty|decimal',
+    //     'uom'             => 'required|alpha_numeric_punct'
+    // ];
     // protected $skipValidation = false;
     // protected $validationRules = [
     //     'material_number' => 'required|safe_string',
@@ -50,13 +64,13 @@ class GrTempModel extends Model
     //         'required' => 'Username is required',
     //     ]
     // ];
-
-    public function save_detail($delivery_number, $staging_location)
+    public function save_detail($delivery_number, $staging_location, $gr_id)
     {
         $item = $this->where('delivery_number', $delivery_number)->findAll();
         $data = [];
         foreach ($item as $i) {
             $data[] = [
+                'gr_id' => $gr_id,
                 'delivery_number' => $delivery_number,
                 'material_number' => $i['material_number'],
                 'qty_order' => $i['qty_order'],

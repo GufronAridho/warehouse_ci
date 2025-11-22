@@ -8,7 +8,6 @@ use App\Models\LocationModel;
 use App\Models\StockModel;
 use App\Models\GrHeaderModel;
 use App\Models\GrDetailModel;
-use App\Models\GrTempModel;
 
 class Summary extends BaseController
 {
@@ -18,7 +17,6 @@ class Summary extends BaseController
     protected $StockModel;
     protected $GrHeaderModel;
     protected $GrDetailModel;
-    protected $GrTempModel;
 
     public function __construct()
     {
@@ -28,7 +26,6 @@ class Summary extends BaseController
         $this->StockModel = new StockModel();
         $this->GrHeaderModel = new GrHeaderModel();
         $this->GrDetailModel = new GrDetailModel();
-        $this->GrTempModel = new GrTempModel();
     }
 
     private function _json_response($status, $message, $is_validation = false)

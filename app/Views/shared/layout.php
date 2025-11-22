@@ -103,18 +103,18 @@
             <div class="sidebar-wrapper">
                 <nav class="mt-2">
                     <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a href="<?= base_url('process/good_receipt_image'); ?>"
                                 class="nav-link <?= (strpos(uri_string(), 'process/good_receipt_image') === 0) ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-truck-loading"></i>
                                 <p>Good Receipt (Image)</p>
                             </a>
-                        </li>
+                        </li> -->
                         <li class="nav-item">
                             <a href="<?= base_url('process/good_receipt_input'); ?>"
                                 class="nav-link <?= (strpos(uri_string(), 'process/good_receipt_input') === 0) ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-truck-loading"></i>
-                                <p>Good Receipt (Input)</p>
+                                <p>Good Receipt</p>
                             </a>
                         </li>
                         <li class="nav-item">
