@@ -64,27 +64,27 @@ class TempGrDetailModel extends Model
     //         'required' => 'Username is required',
     //     ]
     // ];
-    public function save_detail($delivery_number, $staging_location, $gr_id)
-    {
-        $item = $this->where('delivery_number', $delivery_number)->findAll();
-        $data = [];
-        foreach ($item as $i) {
-            $data[] = [
-                'gr_id' => $gr_id,
-                'delivery_number' => $delivery_number,
-                'material_number' => $i['material_number'],
-                'qty_order' => $i['qty_order'],
-                'qty_received' => $i['qty_received'],
-                // 'qty_remaining' => max($i['qty_order'] - $i['qty_received'], 0),
-                'qty_remaining' => $i['qty_received'],
-                'uom' => $i['uom'],
-                'status' => 'RECEIVED',
-                'staging_location' => $staging_location,
-            ];
-        }
-        $GrDetailModel = new \App\Models\GrDetailModel();
-        $GrDetailModel->insertBatch($data);
-        $this->where('delivery_number', $delivery_number)->delete();
-        return true;
-    }
+    // public function save_detail($delivery_number, $staging_location, $gr_id)
+    // {
+    //     $item = $this->where('delivery_number', $delivery_number)->findAll();
+    //     $data = [];
+    //     foreach ($item as $i) {
+    //         $data[] = [
+    //             'gr_id' => $gr_id,
+    //             'delivery_number' => $delivery_number,
+    //             'material_number' => $i['material_number'],
+    //             'qty_order' => $i['qty_order'],
+    //             'qty_received' => $i['qty_received'],
+    //             // 'qty_remaining' => max($i['qty_order'] - $i['qty_received'], 0),
+    //             'qty_remaining' => $i['qty_received'],
+    //             'uom' => $i['uom'],
+    //             'status' => 'RECEIVED',
+    //             'staging_location' => $staging_location,
+    //         ];
+    //     }
+    //     $GrDetailModel = new \App\Models\GrDetailModel();
+    //     $GrDetailModel->insertBatch($data);
+    //     $this->where('delivery_number', $delivery_number)->delete();
+    //     return true;
+    // }
 }

@@ -64,7 +64,7 @@ class StockModel extends Model
             'bin' => $bin
         ])->first();
         if ($exist) {
-            $add_qty = $exist['qty'] + $qty;
+            $add_qty = (float)$exist['qty'] + (float)$qty;
             $this->update($exist['id'], [
                 'qty' => $add_qty,
                 'last_updated' => date('Y-m-d H:i:s')
@@ -79,5 +79,36 @@ class StockModel extends Model
                 'last_updated' => date('Y-m-d H:i:s')
             ]);
         }
+    }
+
+    public function deduct_stock(
+        $material_number,
+        $qty,
+        $location_id,
+        $rack,
+        $bin
+    ) {
+        $exist = $this->where([
+            'material_number' => $material_number,
+            'location_id' => $location_id,
+            'rack' => $rack,
+            'bin' => $bin
+        ])->first();
+
+        if (!$exist) {
+            return false;
+        }
+
+        $new_qty = (float)$exist['qty'] - (float)$qty;
+        if ($new_qty < 0) {
+            $new_qty = 0;
+        }
+
+        $this->update($exist['id'], [
+            'qty' => $new_qty,
+            'last_updated' => date('Y-m-d H:i:s')
+        ]);
+
+        return true;
     }
 }

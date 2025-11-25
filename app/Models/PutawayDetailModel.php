@@ -7,9 +7,9 @@ use CodeIgniter\Model;
 class PutawayDetailModel extends Model
 {
     protected $table = 'tbl_putaway_detail';
-    protected $primaryKey = 'detail_id';
+    protected $primaryKey = 'putaway_detail_id';
     protected $allowedFields = [
-        'putaway_id',
+        // 'putaway_id',
         'gr_detail_id',
         'material_number',
         'from_location',
@@ -19,6 +19,9 @@ class PutawayDetailModel extends Model
         'qty',
         'uom',
         'status',
-        'timestamp'
+        'transfer_by',
+        'transfer_at',
+        'stored_by',
+        'stored_at',
     ];
 }

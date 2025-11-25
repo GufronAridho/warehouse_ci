@@ -10,6 +10,7 @@ use App\Models\TempGrHeaderModel;
 use App\Models\TempGrDetailModel;
 use App\Models\GrHeaderModel;
 use App\Models\GrDetailModel;
+use App\Models\PutawayDetailModel;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
@@ -25,6 +26,7 @@ class Process extends BaseController
     protected $StockModel;
     protected $GrHeaderModel;
     protected $GrDetailModel;
+    protected $PutawayDetailModel;
     protected $TempGrHeaderModel;
     protected $TempGrDetailModel;
 
@@ -36,6 +38,7 @@ class Process extends BaseController
         $this->StockModel = new StockModel();
         $this->GrHeaderModel = new GrHeaderModel();
         $this->GrDetailModel = new GrDetailModel();
+        $this->PutawayDetailModel = new PutawayDetailModel();
         $this->TempGrHeaderModel = new TempGrHeaderModel();
         $this->TempGrDetailModel = new TempGrDetailModel();
     }
@@ -69,9 +72,9 @@ class Process extends BaseController
     {
         $user = auth()->user();
         $username = $user->username;
-        $tempHeaders = $this->TempGrHeaderModel->where('username', $username)->findAll();
-        if (!empty($tempHeaders)) {
-            foreach ($tempHeaders as $header) {
+        $temp_headers = $this->TempGrHeaderModel->where('username', $username)->findAll();
+        if (!empty($temp_headers)) {
+            foreach ($temp_headers as $header) {
                 $this->TempGrDetailModel->where('temp_id', $header['temp_id'])->delete();
             }
             $this->TempGrHeaderModel->where('username', $username)->delete();
@@ -131,6 +134,54 @@ class Process extends BaseController
             'item' => $item
         ];
         return view('process/partial/gr_print_detail_table', $data);
+    }
+
+    public function putaway_pallet_table()
+    {
+        $invoice_no = $this->request->getGet('invoice_no');
+
+        $item = $this->GrDetailModel->select('tbl_gr_detail.*, b.material_desc')
+            ->join('mst_material b', 'tbl_gr_detail.material_number = b.material_number', 'left')
+            ->where('invoice_no', $invoice_no)
+            ->findAll();
+
+        $data = [
+            'item' => $item,
+        ];
+
+        return view('process/partial/putaway_pallet_table', $data);
+    }
+
+    public function putaway_material_table()
+    {
+        $invoice_no = $this->request->getGet('invoice_no');
+
+        $item = $this->PutawayDetailModel
+            ->select("
+            tbl_putaway_detail.*,
+            tbl_gr_detail.delivery_number,
+            tbl_gr_detail.staging_location,
+            b.material_desc
+        ")
+            ->join("tbl_gr_detail", "tbl_gr_detail.gr_detail_id = tbl_putaway_detail.gr_detail_id", "left")
+            ->join('mst_material b', 'tbl_gr_detail.material_number = b.material_number', 'left')
+            ->where("tbl_gr_detail.invoice_no", $invoice_no)
+            ->orderBy("tbl_putaway_detail.putaway_detail_id", "DESC")
+            ->findAll();
+
+        $data = [
+            'item' => $item,
+        ];
+
+        $transfer_ids = array_column(
+            array_filter($item, fn($row) => $row['status'] === 'TRANSFER'),
+            'putaway_detail_id'
+        );
+
+        return $this->response->setJSON([
+            'html' => view('process/partial/putaway_material_table', $data),
+            'ids' => $transfer_ids
+        ]);
     }
 
     public function modal_material_detail()
@@ -365,12 +416,12 @@ class Process extends BaseController
             if (!$temp_gr_id) {
                 return $this->_json_response(false, 'Missing temporary GR ID.');
             }
-            $tempHeader = $this->TempGrHeaderModel->where('temp_id', $temp_gr_id)->first();
-            if (!$tempHeader) {
+            $temp_header = $this->TempGrHeaderModel->where('temp_id', $temp_gr_id)->first();
+            if (!$temp_header) {
                 return $this->_json_response(false, 'Temporary GR header not found.');
             }
-            $tempDetails = $this->TempGrDetailModel->where('temp_id', $temp_gr_id)->findAll();
-            if (empty($tempDetails)) {
+            $temp_detail = $this->TempGrDetailModel->where('temp_id', $temp_gr_id)->findAll();
+            if (empty($temp_detail)) {
                 return $this->_json_response(false, 'No scanned materials found.');
             }
             $staging = $this->LocationModel
@@ -386,14 +437,14 @@ class Process extends BaseController
             $bin =  $staging['bin'];
 
             $headerData = [
-                'vendor' => $tempHeader['vendor'],
-                'invoice_no' => $tempHeader['invoice_no'],
-                'gr_date' => $tempHeader['gr_date'],
-                'lorry_date' => $tempHeader['lorry_date'],
-                'type' => $tempHeader['type'],
+                'vendor' => $temp_header['vendor'],
+                'invoice_no' => $temp_header['invoice_no'],
+                'gr_date' => $temp_header['gr_date'],
+                'lorry_date' => $temp_header['lorry_date'],
+                'type' => $temp_header['type'],
                 'received_by' => $username,
                 'status' => 'RECEIVED',
-                'record_date' => $tempHeader['record_date'],
+                'record_date' => $temp_header['record_date'],
             ];
 
             $db = \Config\Database::connect();
@@ -402,16 +453,16 @@ class Process extends BaseController
             try {
                 if ($this->GrHeaderModel->insert($headerData)) {
                     $gr_header_id = $this->GrHeaderModel->getInsertID();
-                    foreach ($tempDetails as $item) {
+                    foreach ($temp_detail as $item) {
 
                         $detailData = [
                             'gr_id' => $gr_header_id,
-                            'invoice_no' => $tempHeader['invoice_no'],
+                            'invoice_no' => $temp_header['invoice_no'],
                             'delivery_number' => $item['delivery_number'],
                             'material_number' => $item['material_number'],
                             'qty_order' => $item['qty_order'],
                             'qty_received' => $item['qty_received'],
-                            'qty_remaining' => $item['qty_order'] - $item['qty_received'],
+                            'qty_remaining' => $item['qty_received'],
                             'uom' => $item['uom'],
                             'shipment_id' => $item['shipment_id'],
                             'customer_po' => $item['customer_po'],
@@ -441,7 +492,7 @@ class Process extends BaseController
                         true,
                         'Goods Receipt submitted successfully.',
                         null,
-                        $tempHeader['invoice_no']
+                        $temp_header['invoice_no']
                     );
                 }
                 $errors = $this->GrHeaderModel->errors();
@@ -455,6 +506,212 @@ class Process extends BaseController
         return $this->_json_response(false, 'Invalid request method');
     }
 
+    public function check_location()
+    {
+        $location_code = $this->request->getPost('location_code');
+
+        $location = $this->LocationModel
+            ->where('location_code', $location_code)
+            ->where('is_active', 1)
+            ->first();
+
+        if ($location) {
+            return $this->_json_response(
+                true,
+                'Location exist.'
+            );
+        }
+
+        return $this->_json_response(
+            false,
+            'Location not found or inactive.'
+        );
+    }
+
+    public function scan_putaway_detail()
+    {
+        $delivery = $this->request->getPost('delivery');
+        $material = $this->request->getPost('material');
+        $qty = (float) $this->request->getPost('qty');
+        $uom = $this->request->getPost('uom');
+        $invoice_no = $this->request->getPost('invoice_no');
+
+        $user = auth()->user();
+        $username = $user->username;
+
+        if (!$delivery || !$material || !$qty || !$invoice_no) {
+            return $this->_json_response(false, 'Missing required fields.');
+        }
+
+        $gr = $this->GrDetailModel
+            ->where('invoice_no', $invoice_no)
+            ->where('delivery_number', $delivery)
+            ->where('material_number', $material)
+            ->first();
+
+        if (!$gr) {
+            return $this->_json_response(false, 'Material not found in GR detail.');
+        }
+        if ($gr['qty_remaining'] <= 0) {
+            return $this->_json_response(false, 'Quantity already completed for this material.');
+        }
+
+        if ($qty > $gr['qty_remaining']) {
+            return $this->_json_response(false, 'Scanned qty exceeds remaining qty.');
+        }
+
+        $existing = $this->PutawayDetailModel
+            ->where('gr_detail_id', $gr['gr_detail_id'])
+            ->where('material_number', $material)
+            ->where('status', 'TRANSFER')
+            ->first();
+
+        if ($existing) {
+            $updatedQty = (float) $existing['qty'] + $qty;
+
+            $this->PutawayDetailModel->update($existing['putaway_detail_id'], [
+                'qty' => $updatedQty,
+                'uom' => $uom,
+                'status' => 'TRANSFER',
+                'transfer_by' => $username,
+                'transfer_at' => date('Y-m-d H:i:s'),
+            ]);
+        } else {
+            $this->PutawayDetailModel->insert([
+                'gr_detail_id' => $gr['gr_detail_id'],
+                'material_number' => $material,
+                'from_location' => $gr['staging_location'] ?? 'STAGING',
+                'to_location' => null,
+                'to_rack' => null,
+                'to_bin' => null,
+                'qty' => $qty,
+                'uom' => $uom,
+                'status' => 'TRANSFER',
+                'transfer_by' => $username,
+                'transfer_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
+        $new_remaining = $gr['qty_remaining'] - $qty;
+        $new_status = ($new_remaining <= 0) ? 'STORED' : 'TRANSFER';
+
+        $this->GrDetailModel->update($gr['gr_detail_id'], [
+            'qty_remaining' => $new_remaining,
+            'status' => $new_status,
+        ]);
+
+        return $this->_json_response(true, 'Material scanned and updated successfully.');
+    }
+
+
+    public function submit_putaway()
+    {
+        if (!$this->request->is('post')) {
+            return $this->_json_response(false, 'Invalid request method.');
+        }
+
+        $user = auth()->user();
+        $username = $user->username;
+
+        $rack = $this->request->getPost('rackValue');
+        $bin = $this->request->getPost('binValue');
+        $expectedQR = $this->request->getPost('expectedQR');
+        $scan_storage_confirm = $this->request->getPost('scan_storage_confirm');
+        $idsJson = $this->request->getPost('putaway_detail_ids');
+        $putawayIds = json_decode($idsJson, true);
+
+        if (empty($putawayIds) || !is_array($putawayIds)) {
+            return $this->_json_response(false, 'No putaway detail IDs received.');
+        }
+
+        if (!$rack || !$bin) {
+            return $this->_json_response(false, 'Rack or Bin missing.');
+        }
+
+        if ($scan_storage_confirm !== $expectedQR) {
+            return $this->_json_response(false, 'Scanned QR does not match expected location.');
+        }
+
+        $db = \Config\Database::connect();
+        $db->transStart();
+
+        try {
+            foreach ($putawayIds as $id) {
+                $detail = $this->PutawayDetailModel->find($id);
+                if (!$detail) {
+                    continue;
+                }
+
+                if (strtoupper($detail['status']) !== 'TRANSFER') {
+                    continue;
+                }
+
+                $moveQty = (float) $detail['qty'];
+                if ($moveQty <= 0) {
+                    continue;
+                }
+
+                $fromParts = explode("|", $detail['from_location']);
+                $fromLocationCode = $detail['from_location'];
+                $fromRack = $fromParts[1] ?? null;
+                $fromBin = $fromParts[2] ?? null;
+
+                $stockWhere = [
+                    'material_number' => $detail['material_number'],
+                    'location_id' => $fromLocationCode,
+                    'rack' => $fromRack,
+                    'bin'  => $fromBin,
+                ];
+
+                $stockExist = $this->StockModel
+                    ->where($stockWhere)
+                    ->first();
+
+                if (!$stockExist || (float)$stockExist['qty'] < $moveQty) {
+                    $db->transRollback();
+                    return $this->_json_response(false, "Insufficient stock for material {$detail['material_number']} at source location.");
+                }
+
+                $updateData = [
+                    'to_rack' => $rack,
+                    'to_bin' => $bin,
+                    'to_location' => $scan_storage_confirm,
+                    'status' => 'STORED',
+                    'stored_by' => $username,
+                    'stored_at' => date('Y-m-d H:i:s'),
+                ];
+                $this->PutawayDetailModel->update($id, $updateData);
+
+                $this->StockModel->deduct_stock(
+                    $detail['material_number'],
+                    $moveQty,
+                    $fromLocationCode,
+                    $fromRack,
+                    $fromBin
+                );
+
+                $this->StockModel->update_stock(
+                    $detail['material_number'],
+                    $moveQty,
+                    $scan_storage_confirm,
+                    $rack,
+                    $bin
+                );
+            }
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                return $this->_json_response(false, 'Transaction failed.');
+            }
+
+            return $this->_json_response(true, 'Putaway stored successfully.');
+        } catch (\Exception $e) {
+            $db->transRollback();
+            return $this->_json_response(false, $e->getMessage());
+        }
+    }
+
     public function gr_detail_label()
     {
         $material = $this->request->getGet('material');
@@ -466,7 +723,7 @@ class Process extends BaseController
             return "Missing parameters!";
         }
 
-        $qr_content = "{$delivery};{$material};{$qty};{$uom}";
+        $qr_content = "{$delivery};{$material};{$qty};{$uom};";
 
         $builder = new Builder(
             writer: new PngWriter(),
@@ -507,7 +764,7 @@ class Process extends BaseController
         }
 
 
-        $qr_content = "{$invoice_no};{$vendor}";
+        $qr_content = "{$invoice_no};{$vendor};";
 
         $builder = new Builder(
             writer: new PngWriter(),

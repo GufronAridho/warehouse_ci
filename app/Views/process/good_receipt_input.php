@@ -462,14 +462,14 @@
 
         let line = decodedText.trim();
 
-        const formatRegex = /^([^;]+);([^;]+);([^;]+);([^;]+)$/;
+        const formatRegex = /^([^;]+);([^;]+);([^;]+);([^;]+);$/;
         if (!formatRegex.test(line)) {
             Swal.fire({
                 icon: 'error',
                 title: 'Invalid Format',
                 html: `Scanned data is invalid:<br>
                    <code>${line}</code><br><br>
-                   Expected: <code>delivery_number;material_number;qty_order;uom</code>`
+                   Expected: <code>delivery_number;material_number;qty_order;uom;</code>`
             });
 
             $("#material-input").val('').focus();
@@ -660,7 +660,7 @@
     function check_submit_gr() {
         let disable_submit = false;
         $("#table_material_detail_body tr").each(function() {
-            if ($(this).hasClass("table-danger")) {
+            if ($(this).hasClass("table-open")) {
                 disable_submit = true;
             }
         });
