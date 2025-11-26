@@ -162,6 +162,13 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
+                                    <a href="<?= base_url('master_data/mst_safg_bom'); ?>"
+                                        class="nav-link <?= (uri_string() == 'master_data/mst_safg_bom') ? 'active' : '' ?>">
+                                        <i class="fas fa-sitemap nav-icon"></i>
+                                        <p>Master BOM</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
                                     <a href="<?= base_url('master_data/mst_location'); ?>"
                                         class="nav-link <?= (uri_string() == 'master_data/mst_location') ? 'active' : '' ?>">
                                         <i class="fas fa-map-marker-alt nav-icon"></i>

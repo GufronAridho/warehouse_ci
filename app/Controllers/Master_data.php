@@ -6,6 +6,8 @@ use CodeIgniter\Shield\Entities\User;
 use App\Models\MaterialModel;
 use App\Models\LocationModel;
 use App\Models\StockModel;
+use App\Models\SAFGModel;
+
 
 class Master_data extends BaseController
 {
@@ -13,6 +15,7 @@ class Master_data extends BaseController
     protected $MaterialModel;
     protected $LocationModel;
     protected $StockModel;
+    protected $SAFGModel;
 
     public function __construct()
     {
@@ -20,6 +23,7 @@ class Master_data extends BaseController
         $this->MaterialModel = new MaterialModel();
         $this->LocationModel = new LocationModel();
         $this->StockModel = new StockModel();
+        $this->SAFGModel = new SAFGModel();
     }
 
     private function _json_response($status, $message, $is_validation = false)
@@ -66,6 +70,13 @@ class Master_data extends BaseController
         ]);
     }
 
+    public function mst_safg_bom()
+    {
+        return view('master_data/mst_safg_bom', [
+            'title' => 'SAFG Bom',
+        ]);
+    }
+
     public function user_table()
     {
         $users = $this->MstUser->withIdentities()
@@ -108,6 +119,33 @@ class Master_data extends BaseController
             'item' => $item
         ];
         return view('master_data/partial/stock_table', $data);
+    }
+
+    public function safg_table()
+    {
+        $item = $this->SAFGModel
+            ->select('safg_number, safg_desc, plant, cell_name')
+            ->groupBy('safg_number, safg_desc')
+            ->findAll();
+        $data = [
+            'item' => $item
+        ];
+        return view('master_data/partial/safg_table', $data);
+    }
+
+    public function safg_material_table()
+    {
+        $safg_number = $this->request->getGet('safg_number');
+
+        $item = $this->SAFGModel
+            ->select('mst_safg_bom.*, mst_material.material_desc, mst_material.uom, mst_material.price')
+            ->join('mst_material', 'mst_material.material_number = mst_safg_bom.material_number', 'left')
+            ->where('mst_safg_bom.safg_number', $safg_number)
+            ->findAll();
+        $data = [
+            'item' => $item
+        ];
+        return view('master_data/partial/safg_material_table', $data);
     }
 
     private function updateUserGroup($userId, $newGroup)
@@ -415,6 +453,152 @@ class Master_data extends BaseController
                     return $this->_json_response(true, 'Material deleted successfully');
                 } else {
                     return $this->_json_response(false, 'Failed to delete material');
+                }
+            } catch (\Exception $e) {
+                return $this->_json_response(false, $e->getMessage());
+            }
+        }
+
+        return $this->_json_response(false, 'Invalid request method');
+    }
+
+
+    public function create_safg()
+    {
+        if ($this->request->is('post')) {
+
+            $safgNumber = $this->request->getPost('safg_number');
+
+            $data = [
+                'safg_number' => $safgNumber,
+                'safg_desc' => $this->request->getPost('safg_desc'),
+                'plant' => $this->request->getPost('plant'),
+                'cell_name' => $this->request->getPost('cell_name'),
+                'material_number' => $this->request->getPost('material_number'),
+                'qty' => $this->request->getPost('qty'),
+                'is_active' => $this->request->getPost('is_active'),
+                'record_date' => date('Y-m-d H:i:s'),
+            ];
+
+            try {
+                if ($this->SAFGModel->insert($data)) {
+                    return $this->_json_response(true, 'SAFG created successfully.');
+                } else {
+                    $errors = $this->SAFGModel->errors();
+                    $message = implode(', ', $errors);
+                    return $this->_json_response(false, $message);
+                }
+            } catch (\Exception $e) {
+                return $this->_json_response(false, $e->getMessage());
+            }
+        }
+
+        return $this->_json_response(false, 'Invalid request method');
+    }
+
+    public function update_safg()
+    {
+        if ($this->request->is('post')) {
+
+            $safgNumber = $this->request->getPost('safg_number');
+            if (empty($safgNumber)) {
+                return $this->_json_response(false, 'Missing SAFG Number.');
+            }
+
+            $data = [
+                'safg_desc' => $this->request->getPost('safg_desc'),
+                'plant' => $this->request->getPost('plant'),
+                'cell_name' => $this->request->getPost('cell_name'),
+            ];
+
+            try {
+                if ($this->SAFGModel
+                    ->where('safg_number', $safgNumber)
+                    ->set($data)
+                    ->update()
+                ) {
+                    return $this->_json_response(true, 'SAFG updated successfully.');
+                } else {
+                    $errors = $this->SAFGModel->errors();
+                    $message = implode(', ', $errors);
+                    return $this->_json_response(false, $message);
+                }
+            } catch (\Exception $e) {
+                return $this->_json_response(false, $e->getMessage());
+            }
+        }
+
+        return $this->_json_response(false, 'Invalid request method.');
+    }
+
+    public function update_safg_material()
+    {
+        if ($this->request->is('post')) {
+
+            $id = $this->request->getPost('id_bom');
+            if (empty($id)) {
+                return $this->_json_response(false, 'Missing BOM ID.');
+            }
+
+            $data = [
+                'material_number' => $this->request->getPost('material_number'),
+                'qty' => $this->request->getPost('qty'),
+                'is_active' => $this->request->getPost('is_active'),
+            ];
+
+            try {
+                if ($this->SAFGModel->update($id, $data)) {
+                    return $this->_json_response(true, 'Material updated successfully.');
+                } else {
+                    $errors = $this->SAFGModel->errors();
+                    $message = implode(', ', $errors);
+                    return $this->_json_response(false, $message);
+                }
+            } catch (\Exception $e) {
+                return $this->_json_response(false, $e->getMessage());
+            }
+        }
+
+        return $this->_json_response(false, 'Invalid request method');
+    }
+
+    public function delete_safg()
+    {
+        if ($this->request->is('post')) {
+            $safg_number = $this->request->getPost('safg_number');
+
+            if (empty($safg_number)) {
+                return $this->_json_response(false, 'Missing SAFG Number.');
+            }
+            try {
+                if ($this->SAFGModel
+                    ->where('safg_number', $safg_number)
+                    ->delete()
+                ) {
+                    return $this->_json_response(true, 'SAFG deleted successfully');
+                } else {
+                    return $this->_json_response(false, 'Failed to delete SAFG');
+                }
+            } catch (\Exception $e) {
+                return $this->_json_response(false, $e->getMessage());
+            }
+        }
+
+        return $this->_json_response(false, 'Invalid request method');
+    }
+
+    public function delete_safg_material()
+    {
+        if ($this->request->is('post')) {
+            $id = $this->request->getPost('id');
+            if (empty($id)) {
+                return $this->_json_response(false, 'Missing ID.');
+            }
+            try {
+                if ($this->SAFGModel->delete($id)) {
+                    return $this->_json_response(true, 'Material deleted successfully');
+                } else {
+                    return $this->_json_response(false, 'Failed to delete Material');
                 }
             } catch (\Exception $e) {
                 return $this->_json_response(false, $e->getMessage());
