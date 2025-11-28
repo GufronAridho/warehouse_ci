@@ -33,3 +33,5 @@ $routes->get('select_form/(:any)', 'Select_form::$1');
 $routes->post('select_form/(:any)', 'Select_form::$1');
 $routes->get('summary/(:any)', 'Summary::$1');
 $routes->post('summary/(:any)', 'Summary::$1');
+$routes->get('picking/(:any)', 'Picking::$1');
+$routes->post('picking/(:any)', 'Picking::$1');

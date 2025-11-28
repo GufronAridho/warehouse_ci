@@ -29,9 +29,9 @@
         }
 
         .text {
-            font-size: 18px;
+            font-size: 24px;
             line-height: 1.5;
-            padding-left: 16px;
+            /* padding-left: 16px; */
         }
 
         .text div {
@@ -39,7 +39,7 @@
         }
 
         strong {
-            font-size: 18px;
+            font-size: 24px;
         }
 
         @page {

@@ -96,21 +96,23 @@
                                 <textarea id="scanner-input" class="form-control" rows="4" placeholder="Scan Delivery Here" autofocus></textarea>
                             </div>
                         </div>
-                        <table class="table table-bordered table-hover table-custom" id="table_delivery_detail" style="display: none;">
-                            <thead>
-                                <tr>
-                                    <th class="text-center">Delivery Number</th>
-                                    <th class="text-center">Material Number</th>
-                                    <th class="text-end">Qty Ordered</th>
-                                    <th class="text-center">UOM</th>
-                                    <th class="text-center">Shipment ID</th>
-                                    <th class="text-center">Customer PO</th>
-                                    <th class="text-center">PO Line</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table_delivery_detail_body">
-                            </tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover table-custom" id="table_delivery_detail" style="display: none;">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">Delivery Number</th>
+                                        <th class="text-center">Material Number</th>
+                                        <th class="text-end">Qty Ordered</th>
+                                        <th class="text-center">UOM</th>
+                                        <th class="text-center">Shipment ID</th>
+                                        <th class="text-center">Customer PO</th>
+                                        <th class="text-center">PO Line</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table_delivery_detail_body">
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     <div class="card-footer d-flex justify-content-end">
                         <button type="submit" class="btn btn-secondary" id="start_scan_material" disabled>
@@ -136,22 +138,24 @@
                         <div class="d-flex justify-content-center">
                             <input type="text" id="material-input" class="form-control" placeholder="Scan Material Here" autofocus>
                         </div>
-                        <table class="table table-bordered table-hover table-custom" id="table_material_detail">
-                            <thead>
-                                <tr>
-                                    <th class="text-center"></th>
-                                    <th class="text-center">Delivery Number</th>
-                                    <th class="text-center">Material Number</th>
-                                    <th class="text-center">Material Description</th>
-                                    <th class="text-end">Qty Ordered</th>
-                                    <th class="text-end">Qty Received</th>
-                                    <th class="text-center">UOM</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table_material_detail_body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover table-custom" id="table_material_detail">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center"></th>
+                                        <th class="text-center">Delivery Number</th>
+                                        <th class="text-center">Material Number</th>
+                                        <th class="text-center">Material Description</th>
+                                        <th class="text-end">Qty Ordered</th>
+                                        <th class="text-end">Qty Received</th>
+                                        <th class="text-center">UOM</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table_material_detail_body">
 
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     <div class="card-footer d-flex justify-content-end">
                         <button type="submit" class="btn btn-success" id="submit_gr">
@@ -174,22 +178,24 @@
                         </li>
                     </ul>
                     <div class="card-body">
-                        <table class="table table-bordered table-striped table-hover table-custom" id="table_print">
-                            <thead>
-                                <tr>
-                                    <th class="text-center">Delivery Number</th>
-                                    <th class="text-center">Material Number</th>
-                                    <th class="text-center">Material Description</th>
-                                    <th class="text-end">Qty Ordered</th>
-                                    <th class="text-end">Qty Received</th>
-                                    <th class="text-center">UOM</th>
-                                    <th class="text-center">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table_print_detail">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover table-custom" id="table_print">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">Delivery Number</th>
+                                        <th class="text-center">Material Number</th>
+                                        <th class="text-center">Material Description</th>
+                                        <th class="text-end">Qty Ordered</th>
+                                        <th class="text-end">Qty Received</th>
+                                        <th class="text-center">UOM</th>
+                                        <th class="text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table_print_detail">
 
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     <div class="card-footer d-flex justify-content-end">
                         <button type="submit" class="btn btn-primary" onclick="print_pallet_id()">
@@ -355,7 +361,6 @@
         $("#scanner-input").val('');
     }
 
-
     function get_table_delivery_local(items) {
         let html = "";
 
@@ -375,8 +380,10 @@
         let table = $('#table_delivery_detail').DataTable();
         table.clear().destroy();
         $("#table_delivery_detail_body").html(html);
-        $('#table_delivery_detail').DataTable();
+        $("#table_delivery_detail").show();
+        initializeDataTable("table_delivery_detail");
     }
+
 
     $("#start_scan_material").click(function() {
         if (scannedItems.length === 0) {
@@ -647,10 +654,12 @@
                 confirmButtonText: "Print",
             }).then((res) => {
                 if (res.isConfirmed) {
-                    window.open(
-                        "<?= base_url('process/gr_detail_label') ?>?material=" + material + "&qty=" + qty + "&uom=" + uom + "&delivery=" + delivery,
-                        "_blank"
-                    );
+                    window.location.href =
+                        "<?= base_url('process/gr_detail_label') ?>" +
+                        "?material=" + material +
+                        "&qty=" + qty +
+                        "&uom=" + uom +
+                        "&delivery=" + delivery;
                 }
             });
         });
@@ -766,9 +775,9 @@
         // });
 
         let datatable = table.DataTable({
-            pageLength: 10,
-            lengthChange: true,
-            searching: true,
+            paging: false,
+            lengthChange: false,
+            searching: false,
             ordering: true,
             scrollX: true,
             orderCellsTop: true,
@@ -835,10 +844,10 @@
     });
 
     function print_pallet_id() {
-        window.open(
-            "<?= base_url('process/print_pallet_id') ?>?invoice_no=" + window.invoice_no + "&vendor=" + window.vendor,
-            "_blank"
-        );
+        window.location.href =
+            "<?= base_url('process/print_pallet_id') ?>" +
+            "?invoice_no=" + window.invoice_no +
+            "&vendor=" + window.vendor;
     }
 </script>
 <?= $this->endSection() ?>

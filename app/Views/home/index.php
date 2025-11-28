@@ -22,7 +22,7 @@
                     $card = [
                         ['title' => 'Good Receipt', 'desc' => 'Record and manage incoming goods efficiently.', 'img' => 'fa-solid fa-truck-loading', 'link' => 'process/good_receipt_input'],
                         ['title' => 'Put Away', 'desc' => 'Organize and store materials in optimal locations.', 'img' => 'fa-solid fa-box-open', 'link' => 'process/put_away'],
-                        ['title' => 'Picking', 'desc' => 'Accurately pick items for orders and shipments.', 'img' => 'fa-solid fa-shopping-cart', 'link' => 'process/picking'],
+                        ['title' => 'Picking', 'desc' => 'Accurately pick items for orders and shipments.', 'img' => 'fa-solid fa-shopping-cart', 'link' => 'picking/create_po'],
                         ['title' => 'Cycle Count', 'desc' => 'Maintain accurate inventory through regular counting.', 'img' => 'fa-solid fa-sync-alt', 'link' => 'process/cycle_count'],
                     ];
                     ?>

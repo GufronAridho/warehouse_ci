@@ -124,13 +124,36 @@
                                 <p>Put Away</p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="<?= base_url('process/picking'); ?>"
-                                class="nav-link <?= (strpos(uri_string(), 'process/picking') === 0) ? 'active' : '' ?>">
+                        <li class="nav-item has-treeview <?= (strpos(uri_string(), 'picking') === 0) ? 'menu-open' : '' ?>">
+                            <a href="#" class="nav-link <?= (strpos(uri_string(), 'picking') === 0) ? 'active' : '' ?>">
                                 <i class="nav-icon fas fa-shopping-cart"></i>
-                                <p>Picking</p>
+                                <p>
+                                    Picking
+                                    <i class="nav-arrow fas fa-angle-left"></i>
+                                </p>
                             </a>
+
+                            <ul class="nav nav-treeview" style="<?= (strpos(uri_string(), 'picking') === 0) ? 'display: block;' : '' ?>">
+
+                                <li class="nav-item">
+                                    <a href="<?= base_url('picking/create_po'); ?>"
+                                        class="nav-link <?= (uri_string() == 'picking/create_po') ? 'active' : '' ?>">
+                                        <i class="fas fa-plus-circle nav-icon"></i>
+                                        <p>Create Work Order</p>
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a href="<?= base_url('picking/list'); ?>"
+                                        class="nav-link <?= (uri_string() == 'picking/list') ? 'active' : '' ?>">
+                                        <i class="fas fa-list nav-icon"></i>
+                                        <p>Picking List</p>
+                                    </a>
+                                </li>
+
+                            </ul>
                         </li>
+
                         <li class="nav-item">
                             <a href="<?= base_url('process/cycle_count'); ?>"
                                 class="nav-link <?= (strpos(uri_string(), 'process/cycle_count') === 0) ? 'active' : '' ?>">
@@ -155,6 +178,20 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
+                                    <a href="<?= base_url('master_data/mst_prod'); ?>"
+                                        class="nav-link <?= (uri_string() == 'master_data/mst_prod') ? 'active' : '' ?>">
+                                        <i class="fas fa-industry nav-icon"></i>
+                                        <p>Master Production</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="<?= base_url('master_data/mst_location'); ?>"
+                                        class="nav-link <?= (uri_string() == 'master_data/mst_location') ? 'active' : '' ?>">
+                                        <i class="fas fa-map-marker-alt nav-icon"></i>
+                                        <p>Storage</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
                                     <a href="<?= base_url('master_data/mst_material'); ?>"
                                         class="nav-link <?= (uri_string() == 'master_data/mst_material') ? 'active' : '' ?>">
                                         <i class="fas fa-boxes nav-icon"></i>
@@ -166,13 +203,6 @@
                                         class="nav-link <?= (uri_string() == 'master_data/mst_safg_bom') ? 'active' : '' ?>">
                                         <i class="fas fa-sitemap nav-icon"></i>
                                         <p>Master BOM</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="<?= base_url('master_data/mst_location'); ?>"
-                                        class="nav-link <?= (uri_string() == 'master_data/mst_location') ? 'active' : '' ?>">
-                                        <i class="fas fa-map-marker-alt nav-icon"></i>
-                                        <p>Location</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
@@ -346,30 +376,6 @@
 
         .sidebar-menu .nav-link:hover i {
             color: #ffd700 !important;
-        }
-
-        @media (max-width: 768px) {
-            .layout-logo .logo-icon {
-                max-height: 36px;
-            }
-
-            .layout-logo .logo-text {
-                max-height: 28px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .layout-logo {
-                justify-content: center;
-            }
-
-            .layout-logo .logo-text {
-                display: none;
-            }
-
-            .layout-logo .logo-icon {
-                max-height: 32px;
-            }
         }
 
         .custom-card-purple {

@@ -40,21 +40,24 @@
             <div class="card shadow-sm rounded-3 custom-card-purple card-table">
 
                 <div class="card-body p-4">
-                    <table class="table table-bordered table-striped table-hover table-custom" id="table_header">
-                        <thead>
-                            <tr>
-                                <th class="text-center">Invoice No</th>
-                                <th class="text-center">Vendor</th>
-                                <th class="text-center">GR Date</th>
-                                <th class="text-center">Lorry Date</th>
-                                <th class="text-center">Type</th>
-                                <th class="text-center">Status</th>
-                                <th class="text-center">Received By</th>
-                                <th class="text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table_header_body"></tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-hover table-custom" id="table_header">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">Invoice No</th>
+                                    <th class="text-center">Vendor</th>
+                                    <th class="text-center">GR Date</th>
+                                    <th class="text-center">Lorry Date</th>
+                                    <th class="text-center">Type</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Received By</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table_header_body"></tbody>
+                        </table>
+                    </div>
+
                 </div>
 
             </div>
@@ -73,30 +76,37 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <table class="table table-bordered table-striped table-hover table-custom" id="table_detail">
-                    <thead>
-                        <tr>
-                            <th class="text-center">Delivery Number</th>
-                            <th class="text-center">Material Number</th>
-                            <th class="text-center">Qty Ordered</th>
-                            <th class="text-center">Qty Received</th>
-                            <th class="text-center">Qty Remaining</th>
-                            <th class="text-center">UOM</th>
-                            <th class="text-center">Shipment ID</th>
-                            <th class="text-center">Customer PO</th>
-                            <th class="text-center">Customer PO Line</th>
-                            <th class="text-center">Staging Location</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-center">Scanned By</th>
-                            <th class="text-center">Scanned At</th>
-                            <th class="text-center">Validated At</th>
-                            <th class="text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table_detail_body"></tbody>
-                </table>
-                <div class="modal-footer">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-hover table-custom" id="table_detail">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Delivery Number</th>
+                                <th class="text-center">Material Number</th>
+                                <th class="text-center">Qty Ordered</th>
+                                <th class="text-center">Qty Received</th>
+                                <th class="text-center">Qty Remaining</th>
+                                <th class="text-center">UOM</th>
+                                <th class="text-center">Shipment ID</th>
+                                <th class="text-center">Customer PO</th>
+                                <th class="text-center">Customer PO Line</th>
+                                <th class="text-center">Staging Location</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Scanned By</th>
+                                <th class="text-center">Scanned At</th>
+                                <th class="text-center">Validated At</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table_detail_body"></tbody>
+                    </table>
+                </div>
 
+                <div class="modal-footer">
+                    <div class="card-footer d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary" onclick="print_pallet_id()">
+                            <i class="fas fa-print me-1"></i> Print Pallet Label
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -112,6 +122,8 @@
 
             const gr_id = $(this).data('gr_id');
             const delivery_number = $(this).data('delivery_number');
+            window.invoice_no = $(this).data('invoice_no')
+            window.vendor = $(this).data('vendor')
             $('#modal_delivery_number').text(delivery_number);
 
             $('#edit_modal').modal('show');
@@ -176,10 +188,12 @@
                 confirmButtonText: "Print",
             }).then((res) => {
                 if (res.isConfirmed) {
-                    window.open(
-                        "<?= base_url('process/gr_detail_label') ?>?material=" + material + "&qty=" + qty + "&uom=" + uom + "&delivery=" + delivery,
-                        "_blank"
-                    );
+                    window.location.href =
+                        "<?= base_url('process/gr_detail_label') ?>" +
+                        "?material=" + material +
+                        "&qty=" + qty +
+                        "&uom=" + uom +
+                        "&delivery=" + delivery;
                 }
             });
         });
@@ -275,6 +289,13 @@
         $('#download_excel').off('click').on('click', function() {
             datatable.button('.buttons-excel').trigger();
         });
+    }
+
+    function print_pallet_id() {
+        window.location.href =
+            "<?= base_url('process/print_pallet_id') ?>" +
+            "?invoice_no=" + window.invoice_no +
+            "&vendor=" + window.vendor;
     }
 </script>
 <?= $this->endSection() ?>

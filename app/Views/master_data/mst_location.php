@@ -44,24 +44,26 @@
             <div class="card shadow-sm rounded-3 custom-card-purple card-table">
                 <!-- Card Body with Table -->
                 <div class="card-body p-4">
-                    <table class="table table-bordered table-striped table-hover table-custom" id="table_detail">
-                        <thead>
-                            <tr>
-                                <th class="text-center">Code</th>
-                                <th class="text-center">Storage Type</th>
-                                <th class="text-center">Rack</th>
-                                <th class="text-center">Bin</th>
-                                <th class="text-end">Capacity</th>
-                                <th class="text-center">Material Type Allowed</th>
-                                <th class="text-center">Priority</th>
-                                <th class="text-center">Status</th>
-                                <th class="text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table_detail_body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-hover table-custom" id="table_detail">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">Code</th>
+                                    <th class="text-center">Storage Type</th>
+                                    <th class="text-center">Rack</th>
+                                    <th class="text-center">Bin</th>
+                                    <th class="text-end">Capacity</th>
+                                    <th class="text-center">Material Type Allowed</th>
+                                    <th class="text-center">Priority</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table_detail_body">
 
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

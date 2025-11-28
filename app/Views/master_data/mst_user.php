@@ -44,20 +44,23 @@
             <div class="card shadow-sm rounded-3 custom-card-purple card-table">
                 <!-- Card Body with Table -->
                 <div class="card-body p-4">
-                    <table class="table table-bordered table-striped table-hover table-custom" id="table_detail">
-                        <thead>
-                            <tr>
-                                <th class="text-center" style="width:2%;">No</th>
-                                <th class="text-center" style="width:20%;">Username</th>
-                                <th class="text-center" style="width:25%;">Email</th>
-                                <th class="text-center" style="width:15%;">Level</th>
-                                <th class="text-center" style="width:20%;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table_detail_body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-hover table-custom" id="table_detail">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" style="width:2%;">No</th>
+                                    <th class="text-center" style="width:20%;">Username</th>
+                                    <th class="text-center" style="width:25%;">Email</th>
+                                    <th class="text-center" style="width:15%;">Level</th>
+                                    <th class="text-center" style="width:20%;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table_detail_body">
 
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
+
                 </div>
             </div>
         </div>

@@ -4,16 +4,19 @@ namespace App\Controllers;
 
 use App\Models\MaterialModel;
 use App\Models\LocationModel;
+use App\Models\ProdModel;
 
 class Select_form extends BaseController
 {
     protected $MaterialModel;
     protected $LocationModel;
+    protected $ProdModel;
 
     public function __construct()
     {
         $this->MaterialModel = new MaterialModel();
         $this->LocationModel = new LocationModel();
+        $this->ProdModel = new ProdModel();
     }
 
     public function materialNumberSelect()
@@ -95,6 +98,59 @@ class Select_form extends BaseController
             $items[] = [
                 'id'   => $row->bin,
                 'name' => $row->bin
+            ];
+        }
+
+        return $this->response->setJSON(['items' => $items]);
+    }
+
+    public function plantSelect()
+    {
+        $q = $this->request->getGet('q');
+        $results = $this->ProdModel->search_plant($q);
+
+        $items = [];
+        foreach ($results as $row) {
+            $items[] = [
+                'id'   => $row->plant_code,
+                'name' => $row->plant_code . ' - ' . $row->plant_name
+            ];
+        }
+
+        return $this->response->setJSON(['items' => $items]);
+    }
+
+    public function lineSelect()
+    {
+        $q = $this->request->getGet('q');
+        $plant_code = $this->request->getGet('plant_code');
+
+        $results = $this->ProdModel->search_line($q, $plant_code);
+
+        $items = [];
+        foreach ($results as $row) {
+            $items[] = [
+                'id'   => $row->line_code,
+                'name' => $row->line_code . ' - ' . $row->line_name
+            ];
+        }
+
+        return $this->response->setJSON(['items' => $items]);
+    }
+
+    public function cellSelect()
+    {
+        $q = $this->request->getGet('q');
+        $plant_code = $this->request->getGet('plant_code');
+        $line_code = $this->request->getGet('line_code');
+
+        $results = $this->ProdModel->search_cell($q, $plant_code, $line_code);
+
+        $items = [];
+        foreach ($results as $row) {
+            $items[] = [
+                'id'   => $row->cell_name,
+                'name' => $row->cell_name
             ];
         }
 

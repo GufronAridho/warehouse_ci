@@ -34,21 +34,24 @@
             <div class="card shadow-sm rounded-3 custom-card-purple card-table">
                 <!-- Card Body with Table -->
                 <div class="card-body p-4">
-                    <table class="table table-bordered table-striped table-hover table-custom" id="table_detail">
-                        <thead>
-                            <tr>
-                                <th class="text-center">material_number</th>
-                                <th class="text-center">location_id</th>
-                                <th class="text-center">rack</th>
-                                <th class="text-center">bin</th>
-                                <th class="text-end">qty</th>
-                                <th class="text-center">last_updated</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table_detail_body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-hover table-custom" id="table_detail">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">material_number</th>
+                                    <th class="text-center">location_id</th>
+                                    <th class="text-center">rack</th>
+                                    <th class="text-center">bin</th>
+                                    <th class="text-end">qty</th>
+                                    <th class="text-center">last_updated</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table_detail_body">
 
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
+
                 </div>
             </div>
         </div>

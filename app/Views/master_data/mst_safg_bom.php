@@ -40,20 +40,24 @@
             <div class="card shadow-sm rounded-3 custom-card-purple card-table">
                 <!-- Card Body with Table -->
                 <div class="card-body p-4">
-                    <table class="table table-bordered table-striped table-hover table-custom" id="table_detail">
-                        <thead>
-                            <tr>
-                                <th>SAFG Number</th>
-                                <th>SAFG Description</th>
-                                <th>Plant</th>
-                                <th>Cell Name</th>
-                                <th class="text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table_detail_body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped table-hover table-custom" id="table_detail">
+                            <thead>
+                                <tr>
+                                    <th>SAFG Number</th>
+                                    <th>SAFG Description</th>
+                                    <th>Plant</th>
+                                    <th>Line</th>
+                                    <th>Cell Name</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table_detail_body">
 
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -78,17 +82,21 @@
                             <label class="form-label fw-bold">SAFG Number</label>
                             <input type="text" class="form-control" id="add_safg_number" name="safg_number" required>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-8">
                             <label class="form-label fw-bold">SAFG Description</label>
                             <input type="text" class="form-control" id="add_safg_desc" name="safg_desc" required>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Plant</label>
-                            <input type="text" class="form-control" id="add_plant" name="plant" required>
+                            <select class="form-select" id="add_plant_code" name="plant_code" required></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Line</label>
+                            <select class="form-select" id="add_line_code" name="line_code" required></select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Cell Name</label>
-                            <input type="text" class="form-control" id="add_cell_name" name="cell_name" required>
+                            <select class="form-select" id="add_cell_name" name="cell_name" required></select>
                         </div>
                     </div>
                     <hr class="my-3">
@@ -141,14 +149,19 @@
                         <label class="form-label fw-bold">SAFG Description</label>
                         <input type="text" class="form-control" id="safg_desc" name="safg_desc" placeholder="Enter SAFG Description">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label fw-bold">Plant</label>
-                        <input type="text" class="form-control" id="plant" name="plant" placeholder="Enter Plant Code">
+                        <select class="form-select" id="plant_code" name="plant_code" required></select>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Line</label>
+                        <select class="form-select" id="line_code" name="line_code" required></select>
+                    </div>
+                    <div class="col-md-4">
                         <label class="form-label fw-bold">Cell Name</label>
-                        <input type="text" class="form-control" id="cell_name" name="cell_name" placeholder="Enter Cell Name">
+                        <select class="form-select" id="cell_name" name="cell_name" required></select>
                     </div>
+
                 </div>
                 <hr class="my-4">
                 <h5 class="fw-bold mb-3">Material List for This SAFG</h5>
@@ -247,6 +260,37 @@
             "<?= base_url('select_form/materialNumberSelect') ?>",
             '#add_modal .modal-body'
         );
+        initSelect2Ajax('#add_plant_code', 'Select Plant', '<?= base_url("select_form/plantSelect") ?>', '#add_modal .modal-body');
+
+        initSelect2Ajax('#add_line_code', 'Select Line', '<?= base_url("select_form/lineSelect") ?>', '#add_modal .modal-body', function() {
+            return {
+                plant_code: $('#add_plant_code').val()
+            };
+        });
+
+        initSelect2Ajax('#add_cell_name', 'Select Cell', '<?= base_url("select_form/cellSelect") ?>', '#add_modal .modal-body', function() {
+            return {
+                plant_code: $('#add_plant_code').val(),
+                line_code: $('#add_line_code').val()
+            };
+        });
+    });
+
+    $("#safg_modal").on("shown.bs.modal", function() {
+        initSelect2Ajax('#plant_code', 'Select Plant', '<?= base_url("select_form/plantSelect") ?>', '#safg_modal .modal-body');
+
+        initSelect2Ajax('#line_code', 'Select Line', '<?= base_url("select_form/lineSelect") ?>', '#safg_modal .modal-body', function() {
+            return {
+                plant_code: $('#plant_code').val()
+            };
+        });
+
+        initSelect2Ajax('#cell_name', 'Select Cell', '<?= base_url("select_form/cellSelect") ?>', '#safg_modal .modal-body', function() {
+            return {
+                plant_code: $('#plant_code').val(),
+                line_code: $('#line_code').val()
+            };
+        });
     });
 
     $('#safg_modal').on('hidden.bs.modal', function() {
@@ -270,39 +314,32 @@
         $(this).find('.is-invalid').removeClass('is-invalid');
     });
 
-    function initSelect2Ajax(selector, placeholder, url, modal = null) {
+    function initSelect2Ajax(selector, placeholder, url, modal = null, extraDataFunc = null) {
         $(selector).select2({
             placeholder: placeholder,
             allowClear: true,
             width: '100%',
             dropdownParent: modal ? $(modal) : null,
-            tags: true,
-            createTag: function(params) {
-                let term = $.trim(params.term);
-                let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (term === '' || !emailRegex.test(term)) {
-                    return null;
-                }
-                return {
-                    id: term,
-                    text: term,
-                    newTag: true
-                };
-            },
             ajax: {
                 url: url,
                 dataType: 'json',
-                delay: 250,
+                delay: 100,
                 data: function(params) {
-                    return {
+                    let baseData = {
                         q: params.term
                     };
+                    if (typeof extraDataFunc === 'function') {
+                        baseData = {
+                            ...baseData,
+                            ...extraDataFunc(params)
+                        };
+                    }
+                    return baseData;
                 },
                 processResults: function(data) {
                     if (!data.items) return {
                         results: []
                     };
-
                     return {
                         results: data.items.map(item => ({
                             id: item.id,
@@ -329,15 +366,18 @@
 
         $(document).on('click', '.view-material', function() {
             let safg_number = $(this).data('safg_number');
-            let plant = $(this).data('plant');
-            let cell_name = $(this).data('cell_name');
             let safg_desc = $(this).data('safg_desc');
 
             $("#safg_number").val(safg_number);
-            $("#plant").val(plant);
-            $("#cell_name").val(cell_name);
             $("#safg_desc").val(safg_desc);
 
+            const plant_code = $(this).data("plant_code");
+            const line_code = $(this).data("line_code");
+            const cell_name = $(this).data("cell_name");
+
+            setSelect2Value('#plant_code', plant_code);
+            setSelect2Value('#line_code', line_code);
+            setSelect2Value('#cell_name', cell_name);
             get_table_material(safg_number);
 
             $('#safg_modal').modal('show');
@@ -359,10 +399,15 @@
 
             $("#add_safg_number").val($(this).data("safg_number"));
             $("#add_safg_desc").val($(this).data("safg_desc"));
-            $("#add_plant").val($(this).data("plant"));
-            $("#add_cell_name").val($(this).data("cell_name"));
+            const plant_code = $(this).data("plant_code");
+            const line_code = $(this).data("line_code");
+            const cell_name = $(this).data("cell_name");
 
-            $("#add_modal").modal("show");
+            setSelect2Value('#add_plant_code', plant_code);
+            setSelect2Value('#add_line_code', line_code);
+            setSelect2Value('#add_cell_name', cell_name);
+
+            $('#add_modal').modal("show");
         });
 
         $(document).on('click', '.delete-safg', function() {
@@ -469,7 +514,7 @@
         }
         $('#table_detail_body').html(`
         <tr id="table_loading">
-            <td colspan="5" class="text-center py-4">
+            <td colspan="7" class="text-center py-4">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
@@ -489,7 +534,7 @@
                 console.error("AJAX Error:", error);
                 $('#table_detail_body').html(`
                 <tr>
-                    <td colspan="5" class="text-center text-black p-3">
+                    <td colspan="7" class="text-center text-black p-3">
                         Failed to load data. Please try again.
                     </td>
                 </tr>
@@ -560,7 +605,7 @@
                 $(this).html('<input type="text" placeholder="Search" class="form-control form-control-sm" />');
             }
             if (tableId == 'table_detail') {
-                if (index === 4) {
+                if (index === 6) {
                     $(this).html('');
                 } else {
                     $(this).html('<input type="text" placeholder="Search" class="form-control form-control-sm" />');
@@ -644,7 +689,8 @@
         let data = {
             safg_number: $('#safg_number').val(),
             safg_desc: $('#safg_desc').val(),
-            plant: $('#plant').val(),
+            plant_code: $('#plant_code').val(),
+            line_code: $('#line_code').val(),
             cell_name: $('#cell_name').val()
         };
 

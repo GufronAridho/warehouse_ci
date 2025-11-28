@@ -14,7 +14,8 @@
         <td class="text-center">
             <button class="btn btn-sm btn-info edit-btn"
                 data-gr_id="<?= $i['gr_id']; ?>"
-                data-invoice_no="<?= $i['invoice_no']; ?>">
+                data-invoice_no="<?= $i['invoice_no']; ?>"
+                data-vendor="<?= $i['vendor']; ?>">
                 <i class="fa fa-eye"></i>
             </button>
         </td>

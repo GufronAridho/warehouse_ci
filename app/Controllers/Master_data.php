@@ -7,6 +7,7 @@ use App\Models\MaterialModel;
 use App\Models\LocationModel;
 use App\Models\StockModel;
 use App\Models\SAFGModel;
+use App\Models\ProdModel;
 
 
 class Master_data extends BaseController
@@ -16,6 +17,7 @@ class Master_data extends BaseController
     protected $LocationModel;
     protected $StockModel;
     protected $SAFGModel;
+    protected $ProdModel;
 
     public function __construct()
     {
@@ -24,6 +26,7 @@ class Master_data extends BaseController
         $this->LocationModel = new LocationModel();
         $this->StockModel = new StockModel();
         $this->SAFGModel = new SAFGModel();
+        $this->ProdModel = new ProdModel();
     }
 
     private function _json_response($status, $message, $is_validation = false)
@@ -59,7 +62,7 @@ class Master_data extends BaseController
     public function mst_location()
     {
         return view('master_data/mst_location', [
-            'title' => 'Location',
+            'title' => 'Storage',
         ]);
     }
 
@@ -76,6 +79,14 @@ class Master_data extends BaseController
             'title' => 'SAFG Bom',
         ]);
     }
+
+    public function mst_prod()
+    {
+        return view('master_data/mst_prod', [
+            'title' => 'Master Production',
+        ]);
+    }
+
 
     public function user_table()
     {
@@ -124,7 +135,7 @@ class Master_data extends BaseController
     public function safg_table()
     {
         $item = $this->SAFGModel
-            ->select('safg_number, safg_desc, plant, cell_name')
+            ->select('safg_number, safg_desc, plant_code, line_code, cell_name')
             ->groupBy('safg_number, safg_desc')
             ->findAll();
         $data = [
@@ -138,7 +149,12 @@ class Master_data extends BaseController
         $safg_number = $this->request->getGet('safg_number');
 
         $item = $this->SAFGModel
-            ->select('mst_safg_bom.*, mst_material.material_desc, mst_material.uom, mst_material.price')
+            ->select('
+        mst_safg_bom.*, 
+        mst_material.material_desc, 
+        mst_material.uom, 
+        (mst_safg_bom.qty * mst_material.price) AS price
+    ', false)
             ->join('mst_material', 'mst_material.material_number = mst_safg_bom.material_number', 'left')
             ->where('mst_safg_bom.safg_number', $safg_number)
             ->findAll();
@@ -146,6 +162,15 @@ class Master_data extends BaseController
             'item' => $item
         ];
         return view('master_data/partial/safg_material_table', $data);
+    }
+
+    public function prod_table()
+    {
+        $item = $this->ProdModel->findAll();
+        $data = [
+            'item' => $item
+        ];
+        return view('master_data/partial/prod_table', $data);
     }
 
     private function updateUserGroup($userId, $newGroup)
@@ -472,7 +497,8 @@ class Master_data extends BaseController
             $data = [
                 'safg_number' => $safgNumber,
                 'safg_desc' => $this->request->getPost('safg_desc'),
-                'plant' => $this->request->getPost('plant'),
+                'plant_code' => $this->request->getPost('plant_code'),
+                'line_code' => $this->request->getPost('line_code'),
                 'cell_name' => $this->request->getPost('cell_name'),
                 'material_number' => $this->request->getPost('material_number'),
                 'qty' => $this->request->getPost('qty'),
@@ -507,7 +533,8 @@ class Master_data extends BaseController
 
             $data = [
                 'safg_desc' => $this->request->getPost('safg_desc'),
-                'plant' => $this->request->getPost('plant'),
+                'plant_code' => $this->request->getPost('plant_code'),
+                'line_code' => $this->request->getPost('line_code'),
                 'cell_name' => $this->request->getPost('cell_name'),
             ];
 
@@ -599,6 +626,91 @@ class Master_data extends BaseController
                     return $this->_json_response(true, 'Material deleted successfully');
                 } else {
                     return $this->_json_response(false, 'Failed to delete Material');
+                }
+            } catch (\Exception $e) {
+                return $this->_json_response(false, $e->getMessage());
+            }
+        }
+
+        return $this->_json_response(false, 'Invalid request method');
+    }
+
+    public function create_prod()
+    {
+        if ($this->request->is('post')) {
+
+            $data = [
+                'plant_code' => $this->request->getPost('plant_code'),
+                'plant_name' => $this->request->getPost('plant_name'),
+                'line_code' => $this->request->getPost('line_code'),
+                'line_name' => $this->request->getPost('line_name'),
+                'cell_name' => $this->request->getPost('cell_name'),
+                'process_type' => $this->request->getPost('process_type'),
+            ];
+
+            try {
+                if ($this->ProdModel->insert($data)) {
+                    return $this->_json_response(true, 'Production Master created successfully.');
+                } else {
+                    $errors  = $this->ProdModel->errors();
+                    $message = implode(', ', $errors);
+                    return $this->_json_response(false, $message);
+                }
+            } catch (\Exception $e) {
+                return $this->_json_response(false, $e->getMessage());
+            }
+        }
+
+        return $this->_json_response(false, 'Invalid request method');
+    }
+
+    public function update_prod()
+    {
+        if ($this->request->is('post')) {
+
+            $id = $this->request->getPost('id');
+            if (empty($id)) {
+                return $this->_json_response(false, 'Missing Production ID.');
+            }
+
+            $data = [
+                'plant_code' => $this->request->getPost('plant_code'),
+                'plant_name' => $this->request->getPost('plant_name'),
+                'line_code' => $this->request->getPost('line_code'),
+                'line_name' => $this->request->getPost('line_name'),
+                'cell_name' => $this->request->getPost('cell_name'),
+                'process_type' => $this->request->getPost('process_type'),
+            ];
+
+            try {
+                if ($this->ProdModel->update($id, $data)) {
+                    return $this->_json_response(true, 'Production Master updated successfully.');
+                } else {
+                    $errors  = $this->ProdModel->errors();
+                    $message = implode(', ', $errors);
+                    return $this->_json_response(false, $message);
+                }
+            } catch (\Exception $e) {
+                return $this->_json_response(false, $e->getMessage());
+            }
+        }
+
+        return $this->_json_response(false, 'Invalid request method');
+    }
+
+    public function delete_prod()
+    {
+        if ($this->request->is('post')) {
+            $id = $this->request->getPost('id');
+            if (empty($id)) {
+                return $this->_json_response(false, 'Missing ID.');
+            }
+
+            try {
+                if ($this->ProdModel->delete($id)) {
+                    return $this->_json_response(true, 'Production Master deleted successfully.');
+                } else {
+                    return $this->_json_response(false, 'Failed to delete Production Master.');
                 }
             } catch (\Exception $e) {
                 return $this->_json_response(false, $e->getMessage());

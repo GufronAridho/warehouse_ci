@@ -93,18 +93,20 @@
 
                                     <div id="material_putaway_table_area">
                                         <h5 class="fw-bold mb-3">Putaway Details</h5>
-                                        <table class="table table-bordered table-hover table-custom" id="table_putaway_detail">
-                                            <thead>
-                                                <tr>
-                                                    <th class="text-center">Material</th>
-                                                    <th class="text-center">From</th>
-                                                    <th class="text-center">To Rack</th>
-                                                    <th class="text-center">To Bin</th>
-                                                    <th class="text-center">Quantity</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="table_putaway_detail_body"></tbody>
-                                        </table>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-hover table-custom" id="table_putaway_detail">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="text-center">Material</th>
+                                                        <th class="text-center">From</th>
+                                                        <th class="text-center">To Rack</th>
+                                                        <th class="text-center">To Bin</th>
+                                                        <th class="text-center">Quantity</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="table_putaway_detail_body"></tbody>
+                                            </table>
+                                        </div>
                                         <div class="row mt-3 align-items-center">
                                             <div class="col-auto d-flex align-items-center">
                                                 <span class="legend-box me-1" style="background:#ffd36b;"></span> Validating
@@ -593,9 +595,9 @@
         // });
 
         let datatable = table.DataTable({
-            pageLength: 10,
-            lengthChange: true,
-            searching: true,
+            paging: false,
+            lengthChange: false,
+            searching: false,
             ordering: true,
             scrollX: true,
             orderCellsTop: true,

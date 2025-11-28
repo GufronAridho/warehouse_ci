@@ -751,7 +751,9 @@ class Process extends BaseController
         $customPaper = [0, 0, 130, 38];
         $dompdf->setPaper($customPaper);
         $dompdf->render();
-        $dompdf->stream("{$delivery}_{$material}_label.pdf", ['Attachment' => true]);
+        ob_clean();
+        $dompdf->stream("{$delivery}_{$material}_label.pdf");
+        exit();
     }
 
     public function print_pallet_id()
@@ -792,11 +794,12 @@ class Process extends BaseController
         $dompdf = new Dompdf();
         $dompdf->loadHtml($html);
 
-        // Bigger label = 180mm × 70mm
         $customPaper = [0, 0, 510, 200];
         $dompdf->setPaper($customPaper);
 
         $dompdf->render();
-        $dompdf->stream("{$invoice_no}_pallet_label.pdf", ['Attachment' => true]);
+        ob_clean();
+        $dompdf->stream("{$invoice_no}_pallet_label.pdf");
+        exit();
     }
 }

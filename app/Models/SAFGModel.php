@@ -13,7 +13,8 @@ class SAFGModel extends Model
         'safg_desc',
         'material_number',
         'qty',
-        'plant',
+        'plant_code',
+        'line_code',
         'cell_name',
         'record_date',
         'additional',
@@ -24,7 +25,8 @@ class SAFGModel extends Model
         'safg_number' => 'required|safe_string',
         'safg_desc' => 'permit_empty|safe_string',
         'material_number' => 'required|safe_string',
-        'plant' => 'required|safe_string',
+        'plant_code' => 'required|safe_string',
+        'line_code' => 'required|safe_string',
         'cell_name' => 'required|safe_string',
         'additional' => 'permit_empty|safe_string',
         'is_active' => 'in_list[0,1]',
@@ -41,9 +43,13 @@ class SAFGModel extends Model
             'required' => 'Material Number is required.',
             'safe_string' => 'Material Number contains invalid characters.'
         ],
-        'plant' => [
-            'required' => 'Plant is required.',
-            'safe_string' => 'Plant contains invalid characters.'
+        'plant_code' => [
+            'required' => 'Plant code is required.',
+            'safe_string' => 'Plant code contains invalid characters.'
+        ],
+        'line_code' => [
+            'required' => 'Line code is required.',
+            'safe_string' => 'Line code contains invalid characters.'
         ],
         'cell_name' => [
             'required' => 'Cell Name is required.',
